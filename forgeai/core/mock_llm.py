@@ -39,12 +39,42 @@ class OfflineSimulationChatModel(BaseChatModel):
         generation = ChatGeneration(message=AIMessage(content=response_text))
         return ChatResult(generations=[generation])
 
+    def _detect_domain(self, prompt_lower: str) -> str:
+        """Accurately identify whether prompt is for HR policy or Ship Spares."""
+        # 1. Check explicit brief markers
+        if "brief:" in prompt_lower:
+            brief_chunk = prompt_lower.split("brief:")[1][:400]
+            if any(k in brief_chunk for k in ["hr policy", "shore staff", "leave", "maternity", "grievance"]):
+                return "hr"
+            if any(k in brief_chunk for k in ["procurement", "spares", "catalogue", "marine parts"]):
+                return "procurement"
+
+        # 2. Check requirements context
+        if "requirements:" in prompt_lower:
+            req_chunk = prompt_lower.split("requirements:")[1][:400]
+            if any(k in req_chunk for k in ["hr policy", "shore staff", "leave", "grievance", "benefits"]):
+                return "hr"
+            if any(k in req_chunk for k in ["procurement", "ship spares", "catalogue", "supplier"]):
+                return "procurement"
+
+        # 3. Check document samples or summaries
+        if any(k in prompt_lower for k in ["hr_policy_manual", "employee_handbook", "shore staff", "leave entitlements"]):
+            return "hr"
+        if any(k in prompt_lower for k in ["ship_spares", "catalogue.csv", "mrn-", "kleanfilter", "thordon"]):
+            return "procurement"
+
+        # 4. Fallback based on keywords
+        if "hr" in prompt_lower or "leave" in prompt_lower or "maternity" in prompt_lower:
+            return "hr"
+        return "procurement"
+
     def _route_and_generate(self, prompt: str) -> str:
         prompt_lower = prompt.lower()
+        domain = self._detect_domain(prompt_lower)
 
         # 1. Intake Interviewer: Clarifying Questions
         if "generate at most 5 clarifying questions" in prompt_lower or "clarifying questions as a json list" in prompt_lower:
-            if "procurement" in prompt_lower or "ship" in prompt_lower or "spares" in prompt_lower:
+            if domain == "procurement":
                 return json.dumps([
                     "Should the assistant have read-only access to part prices and stock quantities?",
                     "Are emergency orders subject to different authorization thresholds?",
@@ -61,7 +91,7 @@ class OfflineSimulationChatModel(BaseChatModel):
 
         # 2. Auto-answer clarifying questions
         if "simulating a requester who wrote this brief" in prompt_lower:
-            if "procurement" in prompt_lower or "spares" in prompt_lower:
+            if domain == "procurement":
                 return json.dumps([
                     {"question": "Should the assistant have read-only access to part prices and stock quantities?", "answer": "Yes, strictly read-only lookup from the CSV catalogue."},
                     {"question": "Are emergency orders subject to different authorization thresholds?", "answer": "Yes, emergency orders up to USD 25,000 can bypass standard requisition approvals as per Chapter 2."},
@@ -78,8 +108,7 @@ class OfflineSimulationChatModel(BaseChatModel):
 
         # 3. Requirements Generation (Intake Interviewer & Groundability Guard)
         if "produce a structured requirements document as json" in prompt_lower:
-            is_procurement = "procurement" in prompt_lower or "spares" in prompt_lower or "catalogue" in prompt_lower
-            if is_procurement:
+            if domain == "procurement":
                 return json.dumps({
                     "scope": "Assist OceanWave procurement personnel with ship spare parts catalogue lookup, supplier directory queries, and ordering guideline procedures.",
                     "audience": "Vessel managers, technical superintendents, and procurement officers.",
@@ -143,7 +172,7 @@ class OfflineSimulationChatModel(BaseChatModel):
 
         # 5. Agent Generator (declarative agent definition)
         if "you are forgeai's agent generator" in prompt_lower:
-            is_procurement = "procurement" in prompt_lower or "spares" in prompt_lower
+            is_procurement = domain == "procurement"
             if is_procurement:
                 return json.dumps({
                     "name": "OceanWave Ship Spares Procurement Assistant",
@@ -200,7 +229,7 @@ class OfflineSimulationChatModel(BaseChatModel):
 
         # 6. Eval Generator: 24 Test Cases
         if "evaluation set generator" in prompt_lower or "eval cases as a json array" in prompt_lower:
-            is_proc = "procurement" in prompt_lower or "spares" in prompt_lower or "catalogue" in prompt_lower
+            is_proc = domain == "procurement"
             if is_proc:
                 return json.dumps([
                     {"id": "case_01", "question": "What is the unit price and minimum order quantity for MRN-001 Marine Diesel Engine Filter?", "case_type": "answerable", "expected_answer_facts": ["$45.00", "10", "KleanFilter GmbH"], "source_document": "ship_spares_catalogue.csv", "should_refuse": False},
@@ -311,15 +340,26 @@ class OfflineSimulationChatModel(BaseChatModel):
 
         # 9. Apply Fix
         if "apply the specified fix without rewriting the entire prompt" in prompt_lower:
-            return json.dumps({
-                "system_prompt": "You are the OceanWave Assistant with strengthened citation rules and explicit boundary refusal directives.\n\nRULES:\n1. Strictly cite section numbers.\n2. Refuse all discretionary approvals.\n3. Base answers strictly on documents.",
-                "retrieval_config": {
-                    "chunk_size": 420,
-                    "chunk_overlap": 95,
-                    "top_k": 6,
-                    "score_threshold": 0.35
-                }
-            })
+            if domain == "procurement":
+                return json.dumps({
+                    "system_prompt": "You are the OceanWave Ship Spares Procurement Assistant with strengthened citation rules and explicit boundary refusal directives.\n\nRULES:\n1. Strictly cite catalogue and guideline section numbers.\n2. Refuse all purchase approvals.\n3. Base answers strictly on documents.",
+                    "retrieval_config": {
+                        "chunk_size": 420,
+                        "chunk_overlap": 95,
+                        "top_k": 6,
+                        "score_threshold": 0.35
+                    }
+                })
+            else:
+                return json.dumps({
+                    "system_prompt": "You are the OceanWave Shore Staff HR Policy Assistant with strengthened citation rules and explicit boundary refusal directives.\n\nRULES:\n1. Strictly cite policy manual sections.\n2. Refuse all discretionary approvals and legal counsel.\n3. Base answers strictly on documents.",
+                    "retrieval_config": {
+                        "chunk_size": 420,
+                        "chunk_overlap": 95,
+                        "top_k": 6,
+                        "score_threshold": 0.35
+                    }
+                })
 
         # 10. Default / Fallback Chat Response (Agent Runner)
         if "context from documents:" in prompt_lower:

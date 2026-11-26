@@ -5,11 +5,18 @@ A modern, intuitive web dashboard for the ForgeAI agent factory,
 chat runner, and evaluation analytics.
 """
 
+import sys
+from pathlib import Path
+
+# Ensure project root is always in sys.path regardless of how Streamlit is invoked
+_REPO_ROOT = str(Path(__file__).resolve().parent.parent.parent)
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+
 import os
 import json
 import tempfile
 import shutil
-from pathlib import Path
 
 import streamlit as st
 
@@ -23,7 +30,7 @@ st.set_page_config(
 
 
 def apply_theme():
-    """Apply modern responsive theme styling."""
+    """Apply modern responsive theme styling with crystal-clear contrast in both Light and Dark modes."""
     if "dark_mode" not in st.session_state:
         st.session_state.dark_mode = True
 
@@ -32,37 +39,90 @@ def apply_theme():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
-        * { font-family: 'Inter', -apple-system, sans-serif; }
-        .stApp { background-color: #0b0f19; color: #f1f5f9; }
-        .stSidebar { background-color: #111827; border-right: 1px solid #1f2937; }
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        .stApp { background-color: #0b0f19 !important; color: #f1f5f9 !important; }
+        
+        /* Sidebar styling */
+        [data-testid="stSidebar"] {
+            background-color: #111827 !important;
+            border-right: 1px solid #1f2937 !important;
+        }
+        [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+            color: #f8fafc !important;
+        }
+        [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
+            color: #cbd5e1 !important;
+        }
+
+        /* Radio buttons in sidebar */
+        div[data-testid="stRadio"] label {
+            padding: 6px 12px !important;
+            border-radius: 8px !important;
+            transition: all 0.15s ease !important;
+        }
+        div[data-testid="stRadio"] label p,
+        div[data-testid="stRadio"] label div,
+        div[data-testid="stRadio"] label span,
+        div[role="radiogroup"] label p {
+            color: #f1f5f9 !important;
+            font-size: 15px !important;
+            font-weight: 500 !important;
+        }
+        div[data-testid="stRadio"] label:hover {
+            background: rgba(56, 189, 248, 0.1) !important;
+        }
+
+        /* Widget Labels */
+        [data-testid="stWidgetLabel"] label p,
+        [data-testid="stWidgetLabel"] p {
+            color: #e2e8f0 !important;
+            font-weight: 600 !important;
+        }
+
+        /* Headings and body text */
+        h1, h2, h3, h4, h5, h6 {
+            color: #f8fafc !important;
+        }
+        p, li {
+            color: #cbd5e1;
+        }
         
         /* Modern Cards */
         .glass-card {
-            background: linear-gradient(135deg, rgba(31, 41, 55, 0.7), rgba(17, 24, 39, 0.8));
-            border: 1px solid rgba(75, 85, 99, 0.4);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)) !important;
+            border: 1px solid rgba(75, 85, 99, 0.5) !important;
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            padding: 22px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            color: #f8fafc !important;
+        }
+        .glass-card h4, .glass-card h3, .glass-card strong {
+            color: #f8fafc !important;
+        }
+        .glass-card p {
+            color: #cbd5e1 !important;
+            margin-bottom: 8px;
         }
         
         .metric-card {
-            background: #1e293b;
-            border: 1px solid #334155;
+            background: #1e293b !important;
+            border: 1px solid #334155 !important;
             border-radius: 10px;
             padding: 16px;
             text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
         }
         
-        .metric-title { font-size: 0.85em; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
-        .metric-value { font-size: 1.8em; font-weight: 700; color: #38bdf8; margin: 4px 0; }
-        .metric-subtitle { font-size: 0.8em; color: #64748b; }
+        .metric-title { font-size: 0.85em; color: #94a3b8 !important; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+        .metric-value { font-size: 1.8em; font-weight: 700; color: #38bdf8 !important; margin: 4px 0; }
+        .metric-subtitle { font-size: 0.8em; color: #94a3b8 !important; }
         
         /* Badges */
         .badge-chip {
             display: inline-block;
             background: #0284c7;
-            color: white;
+            color: white !important;
             padding: 3px 10px;
             border-radius: 9999px;
             font-size: 0.78em;
@@ -71,58 +131,60 @@ def apply_theme():
         }
         
         .badge-warning {
-            background: #b45309;
-            color: #fef3c7;
-            padding: 4px 10px;
+            background: #451a03 !important;
+            color: #fde68a !important;
+            padding: 8px 12px;
             border-radius: 6px;
-            font-size: 0.85em;
-            margin-bottom: 6px;
+            font-size: 0.88em;
+            margin-bottom: 8px;
             border-left: 4px solid #f59e0b;
         }
 
         .badge-success {
-            background: #065f46;
-            color: #d1fae5;
-            padding: 4px 10px;
+            background: #064e3b !important;
+            color: #a7f3d0 !important;
+            padding: 8px 12px;
             border-radius: 6px;
-            font-size: 0.85em;
-            margin-bottom: 6px;
+            font-size: 0.88em;
+            margin-bottom: 8px;
             border-left: 4px solid #10b981;
         }
         
         /* Chat bubbles */
         .chat-user {
-            background: #1e3a8a;
-            color: #eff6ff;
+            background: #1d4ed8 !important;
+            color: #eff6ff !important;
             padding: 14px 18px;
             border-radius: 16px 16px 4px 16px;
             margin: 10px 0;
             max-width: 80%;
             margin-left: auto;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             line-height: 1.5;
+            font-size: 0.95em;
         }
         
         .chat-agent {
-            background: #1e293b;
-            color: #f8fafc;
+            background: #1e293b !important;
+            color: #f8fafc !important;
             padding: 14px 18px;
             border-radius: 16px 16px 16px 4px;
             margin: 10px 0;
             max-width: 85%;
-            border: 1px solid #334155;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: 1px solid #334155 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             line-height: 1.5;
+            font-size: 0.95em;
         }
         
         .source-highlight {
-            background: #0f172a;
-            border-left: 3px solid #38bdf8;
+            background: #0f172a !important;
+            border-left: 4px solid #38bdf8 !important;
             padding: 10px 14px;
             border-radius: 6px;
             margin: 6px 0;
             font-size: 0.88em;
-            color: #cbd5e1;
+            color: #cbd5e1 !important;
         }
         
         /* Buttons */
@@ -137,35 +199,89 @@ def apply_theme():
         st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        * { font-family: 'Inter', -apple-system, sans-serif; }
-        .stApp { background-color: #f8fafc; color: #0f172a; }
-        .stSidebar { background-color: #ffffff; border-right: 1px solid #e2e8f0; }
+        
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        .stApp { background-color: #f8fafc !important; color: #0f172a !important; }
+        
+        /* Sidebar styling */
+        [data-testid="stSidebar"] {
+            background-color: #ffffff !important;
+            border-right: 1px solid #e2e8f0 !important;
+        }
+        [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+            color: #0f172a !important;
+        }
+        [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
+            color: #334155 !important;
+        }
+
+        /* Radio buttons in sidebar */
+        div[data-testid="stRadio"] label {
+            padding: 6px 12px !important;
+            border-radius: 8px !important;
+            transition: all 0.15s ease !important;
+        }
+        div[data-testid="stRadio"] label p,
+        div[data-testid="stRadio"] label div,
+        div[data-testid="stRadio"] label span,
+        div[role="radiogroup"] label p {
+            color: #0f172a !important;
+            font-size: 15px !important;
+            font-weight: 600 !important;
+        }
+        div[data-testid="stRadio"] label:hover {
+            background: rgba(2, 132, 199, 0.08) !important;
+        }
+
+        /* Widget Labels */
+        [data-testid="stWidgetLabel"] label p,
+        [data-testid="stWidgetLabel"] p {
+            color: #0f172a !important;
+            font-weight: 600 !important;
+        }
+
+        /* Headings and body text */
+        h1, h2, h3, h4, h5, h6 {
+            color: #0f172a !important;
+        }
+        p, li {
+            color: #1e293b;
+        }
         
         .glass-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
+            background: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 22px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+            color: #0f172a !important;
+        }
+        .glass-card h4, .glass-card h3, .glass-card strong {
+            color: #0f172a !important;
+        }
+        .glass-card p {
+            color: #334155 !important;
+            margin-bottom: 8px;
         }
         
         .metric-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
+            background: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
             border-radius: 10px;
             padding: 16px;
             text-align: center;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
         }
         
-        .metric-title { font-size: 0.85em; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
-        .metric-value { font-size: 1.8em; font-weight: 700; color: #0284c7; margin: 4px 0; }
-        .metric-subtitle { font-size: 0.8em; color: #94a3b8; }
+        .metric-title { font-size: 0.85em; color: #475569 !important; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+        .metric-value { font-size: 1.8em; font-weight: 700; color: #0284c7 !important; margin: 4px 0; }
+        .metric-subtitle { font-size: 0.8em; color: #64748b !important; }
         
         .badge-chip {
             display: inline-block;
-            background: #e0f2fe;
-            color: #0369a1;
+            background: #0284c7;
+            color: white !important;
             padding: 3px 10px;
             border-radius: 9999px;
             font-size: 0.78em;
@@ -174,55 +290,66 @@ def apply_theme():
         }
         
         .badge-warning {
-            background: #fef3c7;
-            color: #92400e;
-            padding: 4px 10px;
+            background: #fef3c7 !important;
+            color: #92400e !important;
+            padding: 8px 12px;
             border-radius: 6px;
-            font-size: 0.85em;
-            margin-bottom: 6px;
+            font-size: 0.88em;
+            margin-bottom: 8px;
             border-left: 4px solid #f59e0b;
         }
 
         .badge-success {
-            background: #d1fae5;
-            color: #065f46;
-            padding: 4px 10px;
+            background: #d1fae5 !important;
+            color: #065f46 !important;
+            padding: 8px 12px;
             border-radius: 6px;
-            font-size: 0.85em;
-            margin-bottom: 6px;
+            font-size: 0.88em;
+            margin-bottom: 8px;
             border-left: 4px solid #10b981;
         }
         
         .chat-user {
-            background: #e0f2fe;
-            color: #0369a1;
+            background: #0284c7 !important;
+            color: #ffffff !important;
             padding: 14px 18px;
             border-radius: 16px 16px 4px 16px;
             margin: 10px 0;
             max-width: 80%;
             margin-left: auto;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15);
+            line-height: 1.5;
+            font-size: 0.95em;
         }
         
         .chat-agent {
-            background: #ffffff;
-            color: #1e293b;
+            background: #ffffff !important;
+            color: #0f172a !important;
             padding: 14px 18px;
             border-radius: 16px 16px 16px 4px;
             margin: 10px 0;
             max-width: 85%;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            border: 1px solid #cbd5e1 !important;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+            line-height: 1.5;
+            font-size: 0.95em;
         }
         
         .source-highlight {
-            background: #f1f5f9;
-            border-left: 3px solid #0284c7;
+            background: #f1f5f9 !important;
+            border-left: 4px solid #0284c7 !important;
             padding: 10px 14px;
             border-radius: 6px;
             margin: 6px 0;
             font-size: 0.88em;
-            color: #334155;
+            color: #1e293b !important;
+        }
+
+        /* Buttons */
+        .stButton button {
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -284,8 +411,8 @@ def sidebar():
 def home_page():
     """Render the Overview page."""
     st.markdown("""
-    # 🏭 ForgeAI — The Agent That Builds Agents
-    > **Campus Placement Assessment • Jr. GenAI Engineer**
+    # 🏭 ForgeAI — Autonomous Agent Factory
+    > Autonomous Agent Generation, Retrieval Optimization & Rigorous Evaluation Platform
     """)
     st.markdown("---")
 
@@ -308,12 +435,12 @@ def home_page():
     with col_hero2:
         st.markdown("""
         <div class="glass-card">
-            <h4>🎯 Submission Highlights</h4>
-            <p>✅ <strong>All 9 Core Requirements</strong>: 100% implemented</p>
-            <p>✅ <strong>All 6 Stretch Goals</strong>: Baseline, Regression, Tournament, Budget, Checkpoint & Web UI</p>
-            <p>✅ <strong>Two Pre-committed Demos</strong>: HR Policy & Ship Spares</p>
-            <p>✅ <strong>Zero-Config Mode</strong>: Runs out of the box with built-in simulator</p>
-            <p>✅ <strong>Automated Test Suite</strong>: 14/14 unit tests passing</p>
+            <h4 style="margin-top:0;">⚡ Enterprise Engine Highlights</h4>
+            <p>✅ <strong>Autonomous 6-Stage Factory</strong>: Intake, Agent Synthesis, Eval Generation, Bias-Guarded Judge & Optimizer</p>
+            <p>✅ <strong>Production Benchmarks</strong>: Factory vs Human Baseline comparison & Document Regression suites</p>
+            <p>✅ <strong>Prompt Tournament</strong>: Multi-candidate generation with head-to-head evaluation</p>
+            <p>✅ <strong>Zero-Config Mode</strong>: Built-in resilient simulation LLM for offline demonstration</p>
+            <p>✅ <strong>Quality Assurance</strong>: Comprehensive automated test suite passing all verification checks</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -323,33 +450,33 @@ def home_page():
     with m1:
         st.markdown("""
         <div class="metric-card">
-            <div class="metric-title">Core Modules</div>
-            <div class="metric-value">9 / 9</div>
-            <div class="metric-subtitle">Mandatory Requirements</div>
+            <div class="metric-title">Pipeline Architecture</div>
+            <div class="metric-value">6 Stages</div>
+            <div class="metric-subtitle">Intake through Optimizer</div>
         </div>
         """, unsafe_allow_html=True)
     with m2:
         st.markdown("""
         <div class="metric-card">
-            <div class="metric-title">Stretch Goals</div>
-            <div class="metric-value">6 / 6</div>
-            <div class="metric-subtitle">Full Bonus Points</div>
+            <div class="metric-title">Advanced Suites</div>
+            <div class="metric-value">Full Suite</div>
+            <div class="metric-subtitle">Tournament, Baseline & Regression</div>
         </div>
         """, unsafe_allow_html=True)
     with m3:
         st.markdown("""
         <div class="metric-card">
-            <div class="metric-title">Pre-Built Demos</div>
-            <div class="metric-value">2 Demos</div>
-            <div class="metric-subtitle">HR & Ship Spares Committed</div>
+            <div class="metric-title">Pre-Trained Systems</div>
+            <div class="metric-value">2 Domains</div>
+            <div class="metric-subtitle">HR Policy & Maritime Spares</div>
         </div>
         """, unsafe_allow_html=True)
     with m4:
         st.markdown("""
         <div class="metric-card">
             <div class="metric-title">Tool Registry</div>
-            <div class="metric-value">4 Tools</div>
-            <div class="metric-subtitle">Restrained Attachment</div>
+            <div class="metric-value">Sandboxed</div>
+            <div class="metric-subtitle">Restrained Attachment Model</div>
         </div>
         """, unsafe_allow_html=True)
 
