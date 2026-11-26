@@ -91,6 +91,27 @@ class ToolRegistry:
         except Exception as e:
             return f"Error executing tool '{name}': {str(e)}"
 
+    def get_langchain_tools(self, tool_names: List[str]) -> List[Any]:
+        """Return LangChain StructuredTool objects for the specified subset of tools."""
+        try:
+            from langchain_core.tools import StructuredTool
+        except ImportError:
+            from langchain.tools import StructuredTool
+
+        lc_tools = []
+        for name in tool_names:
+            meta = self._tools.get(name)
+            if not meta:
+                continue
+            lc_tools.append(
+                StructuredTool.from_function(
+                    func=meta["function"],
+                    name=meta["name"],
+                    description=meta["description"],
+                )
+            )
+        return lc_tools
+
     # ─── Tool Implementations ────────────────────────────────────────────
 
     @staticmethod

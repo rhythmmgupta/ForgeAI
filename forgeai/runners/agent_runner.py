@@ -9,9 +9,10 @@ import json
 from typing import List, Dict, Optional, Tuple
 
 try:
-    from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+    from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
 except ImportError:
     from langchain.schema import HumanMessage, SystemMessage, AIMessage
+    ToolMessage = None
 from langchain_community.vectorstores import FAISS
 
 from pathlib import Path
@@ -38,14 +39,38 @@ class AgentRunner:
     ):
         self.definition = agent_definition
         self.llm = get_llm(llm_config)
+        self.embedding_config = embedding_config
         self.tool_registry = tool_registry or ToolRegistry()
         self.doc_folder = doc_folder
         self.chat_history: List[Dict[str, str]] = []
         self.last_tools_used: List[str] = []
         self.vector_store: Optional[FAISS] = None
+        self._doc_fingerprint: Tuple = ()
+        self.llm_with_tools = None
+
+        if self.definition.tools and hasattr(self.llm, "bind_tools") and getattr(self.llm, "_llm_type", "") != "offline_simulation_chat_model":
+            try:
+                lc_tools = self.tool_registry.get_langchain_tools(self.definition.tools)
+                if lc_tools:
+                    self.llm_with_tools = self.llm.bind_tools(lc_tools)
+            except Exception:
+                self.llm_with_tools = None
 
         # Build vector store from documents
         self._build_vector_store(doc_folder, embedding_config)
+
+    @staticmethod
+    def _compute_folder_fingerprint(doc_folder: str) -> Tuple:
+        """Compute a lightweight fingerprint of all supported files in doc_folder."""
+        folder = Path(doc_folder)
+        if not folder.exists():
+            return ()
+        entries = []
+        for p in sorted(folder.iterdir()):
+            if p.suffix.lower() in (".pdf", ".csv", ".txt", ".md"):
+                st = p.stat()
+                entries.append((p.name, st.st_mtime_ns, st.st_size))
+        return tuple(entries)
 
     def _build_vector_store(self, doc_folder: str, embedding_config: EmbeddingConfig):
         """Load documents and build the vector store."""
@@ -57,6 +82,7 @@ class AgentRunner:
         )
         self.vector_store = create_vector_store(chunks, embedding_config)
         self.chunks = chunks
+        self._doc_fingerprint = self._compute_folder_fingerprint(doc_folder)
 
     def query(self, question: str, return_context: bool = False) -> Tuple[str, List[str]]:
         """
@@ -69,6 +95,11 @@ class AgentRunner:
         Returns:
             Tuple of (answer, retrieved_chunks)
         """
+        # 0. Auto-watch: rebuild vector store automatically if documents changed on disk
+        current_fp = self._compute_folder_fingerprint(self.doc_folder)
+        if current_fp and current_fp != self._doc_fingerprint:
+            self._build_vector_store(self.doc_folder, self.embedding_config)
+
         # 1. Retrieve relevant chunks
         retrieved_docs = self.vector_store.similarity_search_with_score(
             question,
@@ -96,8 +127,8 @@ class AgentRunner:
                 page_str = f" (Page {page})" if page else ""
                 source_info.append(f"{source}{page_str}")
 
-        # 2. Check if any tools should be invoked
-        tool_results = self._check_tools(question)
+        # 2. Check if any tools should be invoked (keyword fallback when bind_tools is unavailable)
+        tool_results = "" if self.llm_with_tools else self._check_tools(question)
 
         # 3. Build context
         context = "\n\n---\n\n".join(relevant_chunks) if relevant_chunks else "(No relevant context found)"
@@ -126,10 +157,27 @@ class AgentRunner:
             f"Answer based on the provided context. Cite your sources."
         )))
 
-        # 5. Generate response
+        # 5. Generate response (native tool calling if bound, else standard invoke)
         try:
-            response = invoke_with_retry(self.llm, messages)
-            answer = response.content
+            if self.llm_with_tools is not None and ToolMessage is not None:
+                self.last_tools_used = []
+                response = invoke_with_retry(self.llm_with_tools, messages)
+                tool_calls = getattr(response, "tool_calls", None) or []
+                if tool_calls:
+                    messages.append(response)
+                    for tc in tool_calls:
+                        t_name = tc.get("name", "")
+                        t_args = tc.get("args", {}) or {}
+                        t_id = tc.get("id", t_name)
+                        t_out = self.tool_registry.execute_tool(t_name, **t_args)
+                        if t_name and t_name not in self.last_tools_used:
+                            self.last_tools_used.append(t_name)
+                        messages.append(ToolMessage(content=str(t_out), tool_call_id=t_id))
+                    response = invoke_with_retry(self.llm, messages)
+                answer = response.content if isinstance(response.content, str) else str(response.content)
+            else:
+                response = invoke_with_retry(self.llm, messages)
+                answer = response.content if isinstance(response.content, str) else str(response.content)
         except Exception as e:
             answer = f"I encountered an error processing your question: {str(e)}"
 

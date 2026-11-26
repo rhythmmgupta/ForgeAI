@@ -43,3 +43,31 @@ def test_csv_lookup_functionality(tmp_path):
     # Non-existent query
     res2 = registry.csv_lookup(file_path=str(csv_file), query="Propeller")
     assert "No matching records found" in res2
+
+
+def test_langchain_structured_tools_and_autowatch(tmp_path):
+    from forgeai.config import LLMConfig, EmbeddingConfig
+    from forgeai.models import AgentDefinition
+    from forgeai.runners.agent_runner import AgentRunner
+
+    registry = ToolRegistry()
+    lc_tools = registry.get_langchain_tools(["calculator", "current_date"])
+    assert [t.name for t in lc_tools] == ["calculator", "current_date"]
+
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    (docs_dir / "policy.txt").write_text("Initial rule: max PTO is 20 days.", encoding="utf-8")
+
+    runner = AgentRunner(
+        agent_definition=AgentDefinition(name="Test", system_prompt="Answer from docs.", tools=[]),
+        llm_config=LLMConfig(provider="simulator"),
+        embedding_config=EmbeddingConfig(),
+        doc_folder=str(docs_dir),
+    )
+    old_fp = runner._doc_fingerprint
+
+    # Add a new document while runner is alive
+    (docs_dir / "new_policy.txt").write_text("Updated rule: travel stipend is USD 75 per day.", encoding="utf-8")
+    ans, chunks = runner.query("What is the travel stipend?", return_context=True)
+    assert runner._doc_fingerprint != old_fp
+    assert any("75" in c for c in chunks)

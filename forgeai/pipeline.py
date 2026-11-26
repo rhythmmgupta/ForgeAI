@@ -109,12 +109,13 @@ class ForgeAIPipeline:
         # ═══════════════════════════════════════════════════════════════
         self.console.print("\n[bold yellow]━━━ Stage 1 & 2: Intake Interview & Groundability Guard ━━━[/bold yellow]")
 
-        requirements = self.interviewer.build_requirements(
-            brief=brief,
-            doc_folder=doc_folder,
-            clarifications=clarifications,
-            auto_mode=auto_mode
-        )
+        with self.console.status("[cyan]Analyzing brief and inspecting documents...[/cyan]"):
+            requirements = self.interviewer.build_requirements(
+                brief=brief,
+                doc_folder=doc_folder,
+                clarifications=clarifications,
+                auto_mode=auto_mode
+            )
 
         self._display_requirements(requirements)
 

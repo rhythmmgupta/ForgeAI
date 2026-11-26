@@ -78,6 +78,8 @@ def get_llm(config: LLMConfig):
                 temperature=config.temperature,
                 max_tokens=config.max_tokens,
                 api_key=config.groq_api_key,
+                timeout=30.0,
+                max_retries=1,
             )
         except Exception:
             from forgeai.core.mock_llm import OfflineSimulationChatModel
@@ -94,6 +96,8 @@ def get_llm(config: LLMConfig):
                 temperature=config.temperature,
                 max_output_tokens=config.max_tokens,
                 google_api_key=config.google_api_key,
+                request_timeout=30.0,
+                retries=1,
             )
         except Exception:
             from forgeai.core.mock_llm import OfflineSimulationChatModel
