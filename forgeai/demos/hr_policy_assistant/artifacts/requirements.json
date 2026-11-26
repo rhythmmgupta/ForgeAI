@@ -1,28 +1,27 @@
 {
-  "scope": "Assist OceanWave procurement personnel with ship spare parts catalogue lookup, supplier directory queries, and ordering guideline procedures.",
-  "audience": "Vessel managers, technical superintendents, and procurement officers.",
-  "tone": "Precise, professional, and compliance-oriented.",
+  "scope": "Provide accurate guidance on OceanWave Maritime HR policies, leave entitlements, benefits, code of conduct, and grievance escalation for shore staff.",
+  "audience": "Full-time shore-based employees, warehouse shift workers, and people managers.",
+  "tone": "Empathetic, clear, objective, and strictly policy-grounded.",
   "must_answer_topics": [
-    "Part numbers, unit prices, minimum orders, and stock levels from the catalogue",
-    "Procurement authorization thresholds and approval limits",
-    "Standard, emergency, and blanket order procedures",
-    "Approved supplier directory contacts, ratings, and lead times",
-    "Classification society certifications (SOLAS, MARPOL, ABS, DNV GL)"
+    "Annual leave, sick leave, maternity (26 weeks) and paternity entitlements",
+    "Health insurance coverage limits and dependent eligibility",
+    "Code of conduct standards, anti-harassment policy, and confidentiality NDAs",
+    "Step-by-step grievance procedure timelines and whistleblower protection",
+    "Work hours, remote work policy, and performance review cycles"
   ],
   "must_refuse_topics": [
-    "Approving purchase orders or signing contracts",
-    "Making vendor commitments or negotiating terms",
-    "Authorizing emergency expenditure above thresholds",
-    "Speculating on unlisted parts or supplier pricing"
+    "Granting individual policy exceptions or discretionary leave approvals",
+    "Providing formal legal advice or labor law dispute counsel",
+    "Offering psychological counseling or psychiatric diagnoses (must refer to EAP)",
+    "Personal opinions regarding workplace conflict"
   ],
-  "document_summary": "Ship spares CSV catalogue (30 marine items), procurement guidelines (authority, workflows, audits), and approved supplier directory.",
+  "document_summary": "HR Policy Manual v3.2 covering leave, benefits, conduct, grievances, and workplace safety; Employee Handbook Supplement covering schedules and compensation.",
   "groundability_warnings": [
-    "Real-time live freight tracking is not supported by static documents.",
-    "Direct ERP transactional order placement is outside document knowledge."
+    "Seafarer offshore crew maritime labor convention (MLC) contracts are not included in shore staff policy.",
+    "Executive compensation packages and stock options are not covered in the provided manuals."
   ],
   "tools_needed": [
-    "csv_lookup",
-    "calculator"
+    "current_date"
   ],
   "clarifications": [
     {

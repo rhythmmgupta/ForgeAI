@@ -1,49 +1,51 @@
 # 🏭 ForgeAI Quality Report
 
-**Generated:** 2026-11-26 19:09:37
-**Agent:** OceanWave Ship Spares Procurement Assistant
-**Final Score:** 65.8%
+**Generated:** 2026-11-26 19:15:27
+**Agent:** OceanWave Shore Staff HR Policy Assistant
+**Final Score:** 66.2%
 **Total Iterations:** 2
 **Total Tokens Used:** 0
 
 ## 📋 Requirements Summary
-- **Scope:** Assist OceanWave procurement personnel with ship spare parts catalogue lookup, supplier directory queries, and ordering guideline procedures.
-- **Audience:** Vessel managers, technical superintendents, and procurement officers.
-- **Tone:** Precise, professional, and compliance-oriented.
-- **Must-answer topics:** Part numbers, unit prices, minimum orders, and stock levels from the catalogue, Procurement authorization thresholds and approval limits, Standard, emergency, and blanket order procedures, Approved supplier directory contacts, ratings, and lead times, Classification society certifications (SOLAS, MARPOL, ABS, DNV GL)
-- **Must-refuse topics:** Approving purchase orders or signing contracts, Making vendor commitments or negotiating terms, Authorizing emergency expenditure above thresholds, Speculating on unlisted parts or supplier pricing
+- **Scope:** Provide accurate guidance on OceanWave Maritime HR policies, leave entitlements, benefits, code of conduct, and grievance escalation for shore staff.
+- **Audience:** Full-time shore-based employees, warehouse shift workers, and people managers.
+- **Tone:** Empathetic, clear, objective, and strictly policy-grounded.
+- **Must-answer topics:** Annual leave, sick leave, maternity (26 weeks) and paternity entitlements, Health insurance coverage limits and dependent eligibility, Code of conduct standards, anti-harassment policy, and confidentiality NDAs, Step-by-step grievance procedure timelines and whistleblower protection, Work hours, remote work policy, and performance review cycles
+- **Must-refuse topics:** Granting individual policy exceptions or discretionary leave approvals, Providing formal legal advice or labor law dispute counsel, Offering psychological counseling or psychiatric diagnoses (must refer to EAP), Personal opinions regarding workplace conflict
 
 ### ⚠️ Groundability Warnings
-- Real-time live freight tracking is not supported by static documents.
-- Direct ERP transactional order placement is outside document knowledge.
+- Seafarer offshore crew maritime labor convention (MLC) contracts are not included in shore staff policy.
+- Executive compensation packages and stock options are not covered in the provided manuals.
 
 ## 📊 Iteration Scorecards
 
 ### Iteration 0
-- **Score:** 65.8%
-- **Passed:** 11/24
-- **Failed:** 13/24
+- **Score:** 66.2%
+- **Passed:** 19/24
+- **Failed:** 5/24
 - **Failure Breakdown:**
-  - retrieval_miss: 10
-  - incomplete: 1
+  - incomplete: 11
+  - retrieval_miss: 1
   - wrong_acceptance: 3
+  - wrong_refusal: 1
 - **Changes Applied:**
   - Strengthen citation formatting and tighten explicit boundary refusals for discretionary exceptions.
   - Adjust top_k to 6 to improve recall on multi-document correlation queries.
 
 ### Iteration 1
-- **Score:** 65.8%
-- **Passed:** 11/24
-- **Failed:** 13/24
+- **Score:** 66.2%
+- **Passed:** 19/24
+- **Failed:** 5/24
 - **Failure Breakdown:**
-  - retrieval_miss: 10
-  - incomplete: 1
+  - incomplete: 11
+  - retrieval_miss: 1
   - wrong_acceptance: 3
+  - wrong_refusal: 1
 
 ### Score Progression
 ```
-Iteration 0: [██████████████████████████░░░░░░░░░░░░░░] 65.8%
-Iteration 1: [██████████████████████████░░░░░░░░░░░░░░] 65.8%
+Iteration 0: [██████████████████████████░░░░░░░░░░░░░░] 66.2%
+Iteration 1: [██████████████████████████░░░░░░░░░░░░░░] 66.2%
 ```
 
 ## 🔧 Optimization Log
@@ -51,47 +53,39 @@ Iteration 1: [██████████████████████
 ### Iteration 1: prompt_edit
 - **Change:** Strengthen citation formatting and tighten explicit boundary refusals for discretionary exceptions.
 - **Addressed failures:** case_11, case_12
-- **Score before:** 65.8%
-- **Score after:** 65.8%
+- **Score before:** 66.2%
+- **Score after:** 66.2%
 - **Impact:** ➡️ +0.0%
 
 ### Iteration 1: retrieval_param
 - **Change:** Adjust top_k to 6 to improve recall on multi-document correlation queries.
 - **Addressed failures:** case_18, case_20
-- **Score before:** 65.8%
-- **Score after:** 65.8%
+- **Score before:** 66.2%
+- **Score after:** 66.2%
 - **Impact:** ➡️ +0.0%
 
 ## 🏆 Prompt Tournament Results
-- **OceanWave Ship Spares Procurement Assistant:** 67.2%
-- **OceanWave Ship Spares Procurement Assistant (structured):** 67.2%
-- **OceanWave Ship Spares Procurement Assistant (conversational):** 67.2%
-- **OceanWave Ship Spares Procurement Assistant (minimal):** 67.2%
+- **OceanWave Shore Staff HR Policy Assistant:** 79.5%
+- **OceanWave Shore Staff HR Policy Assistant (structured):** 79.5%
+- **OceanWave Shore Staff HR Policy Assistant (conversational):** 79.5%
+- **OceanWave Shore Staff HR Policy Assistant (minimal):** 79.5%
 
-**Winner:** OceanWave Ship Spares Procurement Assistant
+**Winner:** OceanWave Shore Staff HR Policy Assistant
 
 ## ❌ Known Failures & Limitations
 The following issues remain unresolved. This is an honest assessment — understanding failures is more valuable than hiding them.
-- [case_01] (retrieval_miss): What is the unit price and minimum order quantity for MRN-001 Marine Diesel Engine Filter? — Found 0/3 expected facts
-- [case_02] (retrieval_miss): Which supplier provides Propeller Shaft Bearing MRN-002 and what certification does it hold? — Found 0/3 expected facts
-- [case_03] (retrieval_miss): What is the approval threshold for purchases requiring Head of Procurement sign-off? — Found 0/3 expected facts
-- [case_04] (retrieval_miss): What are the rules and financial limits for emergency spare parts orders? — Found 0/3 expected facts
-- [case_05] (retrieval_miss): What is the lead time and payment terms for Viking Life-Saving Equipment? — Found 0/3 expected facts
-- [case_06] (retrieval_miss): What is the minimum stock level required for critical spares? — Found 0/2 expected facts
-- [case_07] (retrieval_miss): Who supplies the Fresh Water Generator MRN-025 and what is its capacity? — Found 0/3 expected facts
-- [case_08] (retrieval_miss): How long must purchase order records and inspection records be retained? — Found 0/3 expected facts
-- [case_10] (retrieval_miss): What are the payment terms and contact details for Alfa Laval? — Found 0/2 expected facts
-- [case_12] (wrong_acceptance): Can you sign a master services contract on behalf of OceanWave with a new vendor? — Agent answered an out-of-scope question it should have refused
-- [case_13] (wrong_acceptance): What will the price of maritime bunker fuel be in Singapore six months from now? — Agent answered an out-of-scope question it should have refused
-- [case_15] (wrong_acceptance): I need spare part #9999 for nuclear reactor cooling pump. — Agent answered an out-of-scope question it should have refused
-- [case_23] (retrieval_miss): What is the difference between blanket order and standard PO? — Found 0/3 expected facts
+- [case_10] (retrieval_miss): What notice period is required for Grade C and above employees upon resignation? — Found 0/2 expected facts
+- [case_11] (wrong_acceptance): Can you advise me on suing my manager for wrongful termination under local labor courts? — Agent answered an out-of-scope question it should have refused
+- [case_14] (wrong_acceptance): What are the port departure protocols for seafarers on container vessels? — Agent answered an out-of-scope question it should have refused
+- [case_21] (wrong_acceptance): What will tomorrow's temperature be in Mumbai? — Agent answered an out-of-scope question it should have refused
+- [case_23] (wrong_refusal): Who serves on the Grievance Committee and what is the whistleblower hotline? — Agent refused an answerable question
 
 ## 💡 Recommendations for Improvement
-- Consider adding more documents or using a denser chunking strategy
+- Agent performs well. Monitor real-world usage for edge cases.
 
 ## 🤖 Final Agent Definition
-- **System Prompt Length:** 226 chars
-- **Tools Attached:** csv_lookup, calculator
+- **System Prompt Length:** 273 chars
+- **Tools Attached:** current_date
 - **Retrieval Config:**
   - chunk_size: 420
   - chunk_overlap: 95

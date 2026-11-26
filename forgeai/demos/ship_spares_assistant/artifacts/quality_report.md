@@ -1,6 +1,6 @@
 # 🏭 ForgeAI Quality Report
 
-**Generated:** 2026-11-26 19:09:56
+**Generated:** 2026-11-26 19:15:45
 **Agent:** OceanWave Ship Spares Procurement Assistant
 **Final Score:** 66.6%
 **Total Iterations:** 2
@@ -88,7 +88,7 @@ The following issues remain unresolved. This is an honest assessment — underst
 - Consider adding more documents or using a denser chunking strategy
 
 ## 🤖 Final Agent Definition
-- **System Prompt Length:** 226 chars
+- **System Prompt Length:** 269 chars
 - **Tools Attached:** csv_lookup, calculator
 - **Retrieval Config:**
   - chunk_size: 420

@@ -1,8 +1,8 @@
 {
-  "factory_score": 0.6582,
-  "human_score": 0.6582,
-  "factory_passed": 11,
-  "human_passed": 11,
+  "factory_score": 0.6618,
+  "human_score": 0.6384,
+  "factory_passed": 19,
+  "human_passed": 14,
   "factory_wins_count": 0,
   "human_wins_count": 0,
   "ties_count": 24,

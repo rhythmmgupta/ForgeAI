@@ -2,18 +2,18 @@
 
 **Updated Document Folder:** `forgeai/demos/hr_policy_assistant/documents`
 **Historical Eval Cases Evaluated:** `24`
-**Baseline Score:** `65.8%` → **Post-Update Score:** `65.8%`
+**Baseline Score:** `66.2%` → **Post-Update Score:** `66.2%`
 **Status:** ✅ No Regressions Detected
 
 ## 📊 Score Impact Summary
 
 | Metric | Value |
 |---|---|
-| Baseline Score | `65.8%` |
-| Post-Regeneration Score | `65.8%` |
+| Baseline Score | `66.2%` |
+| Post-Regeneration Score | `66.2%` |
 | Regressed Cases | **0** |
 | Improved Cases | 0 |
-| Passed Cases | 11/24 |
+| Passed Cases | 19/24 |
 
 ---
 

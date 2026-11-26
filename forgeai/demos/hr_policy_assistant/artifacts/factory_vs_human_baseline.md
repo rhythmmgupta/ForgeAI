@@ -6,10 +6,10 @@
 
 | Metric | Factory Agent (ForgeAI) | Human Baseline Agent | Advantage |
 |---|---|---|---|
-| **Overall Score** | **65.8%** | 65.8% | Human |
-| **Test Cases Passed** | **11/24** | 11/24 | +0 cases |
-| **Test Cases Failed** | **13** | 13 | -0 failures |
-| **Tools Attached** | `csv_lookup, calculator` | `current_date, weather_api` | Factory attached only needed tools |
+| **Overall Score** | **66.2%** | 63.8% | **Factory (+2.3%)** |
+| **Test Cases Passed** | **19/24** | 14/24 | +5 cases |
+| **Test Cases Failed** | **5** | 10 | -5 failures |
+| **Tools Attached** | `current_date` | `current_date, weather_api` | Factory attached only needed tools |
 | **Retrieval Chunking** | 420c / 95o (k=6) | 1000c / 50o (k=3) | Factory optimized overlap |
 
 ---
