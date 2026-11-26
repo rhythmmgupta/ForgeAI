@@ -1,0 +1,126 @@
+OCEANWAVE MARITIME SERVICES — PROCUREMENT GUIDELINES
+=======================================================
+
+Document: PROC-2024-001
+Effective: February 2024
+Classification: Internal
+
+═══════════════════════════════════════════════════
+CHAPTER 1: PROCUREMENT PROCESS OVERVIEW
+═══════════════════════════════════════════════════
+
+1.1 Purpose
+This document establishes the procurement procedures for ship spare parts,
+marine equipment, and vessel maintenance supplies for OceanWave Maritime Services.
+All procurement personnel must follow these guidelines to ensure cost-effective,
+timely, and compliant purchasing.
+
+1.2 Procurement Authority Levels
+- Up to USD 1,000: Approved by Department Supervisor
+- USD 1,001 to USD 10,000: Approved by Procurement Manager
+- USD 10,001 to USD 50,000: Approved by Head of Procurement
+- USD 50,001 to USD 200,000: Approved by CFO
+- Above USD 200,000: Board approval required
+
+1.3 Vendor Selection Criteria
+- Certification: Vendor must hold relevant ISO/maritime certifications
+- Delivery reliability: >95% on-time delivery rate required
+- Quality record: Less than 2% defect rate over past 12 months
+- Pricing: Must be within 15% of market benchmark
+- Payment terms: Net 30 minimum
+- Geographic coverage: Ability to deliver to major ports
+
+═══════════════════════════════════════════════════
+CHAPTER 2: ORDERING PROCEDURES
+═══════════════════════════════════════════════════
+
+2.1 Standard Orders
+- All orders must be placed through the ERP system (SAP S/4HANA).
+- Purchase requisition (PR) must be created before purchase order (PO).
+- PR requires budget validation and category manager approval.
+- PO must reference the vessel or project number.
+- Three-way matching required: PO, Goods Receipt, Invoice.
+
+2.2 Emergency Orders
+- Emergency orders permitted when vessel safety or operations are at risk.
+- Emergency PO can be verbal but must be followed by written PO within 24 hours.
+- Emergency orders bypass standard approval for amounts up to USD 25,000.
+- Emergency order premium: vendors may charge up to 20% over standard pricing.
+- All emergency orders must be documented with justification in the incident log.
+
+2.3 Blanket Orders
+- For recurring items (filters, gaskets, consumables), blanket orders are preferred.
+- Blanket order period: 12 months maximum.
+- Quantity variations: up to ±20% from estimated annual quantity.
+- Pricing is locked for the blanket order period.
+- Quarterly review of blanket order utilization required.
+
+═══════════════════════════════════════════════════
+CHAPTER 3: INVENTORY MANAGEMENT
+═══════════════════════════════════════════════════
+
+3.1 Stock Levels
+- Critical spares (safety equipment, engine parts): maintain minimum 3-month stock.
+- Standard spares: maintain minimum 1-month stock based on average consumption.
+- Consumables: reorder when stock falls below 2-week supply.
+- Obsolete inventory review: conducted annually in January.
+
+3.2 Warehouse Operations
+- All received goods must be inspected within 48 hours.
+- Inspection checklist includes: quantity verification, visual quality check,
+  certification document review, shelf life verification.
+- Non-conforming goods must be quarantined and vendor notified within 72 hours.
+- Storage conditions: spares requiring controlled environment stored in climate-controlled
+  zones (15-25°C, <60% humidity).
+
+3.3 Inventory Valuation
+- Method: Weighted Average Cost (WAC).
+- Physical inventory count: bi-annually (June and December).
+- Variance tolerance: 2% by value, 5% by quantity.
+- Write-off authority: same as procurement authority levels.
+
+═══════════════════════════════════════════════════
+CHAPTER 4: SUPPLIER MANAGEMENT
+═══════════════════════════════════════════════════
+
+4.1 Approved Supplier List (ASL)
+- Only ASL vendors may supply critical safety and engine parts.
+- ASL review conducted annually.
+- New vendor onboarding: requires quality audit, financial assessment,
+  and reference checks (minimum 3 references).
+- Vendor onboarding time: typically 4-6 weeks.
+
+4.2 Supplier Performance Metrics
+- On-time delivery rate (target: >95%)
+- Quality acceptance rate (target: >98%)
+- Responsiveness (quote turnaround <48 hours)
+- Price competitiveness (within 10% of best quote)
+- Documentation accuracy (invoices, certificates)
+
+4.3 Supplier Development
+- Annual supplier conference for top 20 suppliers.
+- Joint improvement programs for underperforming suppliers.
+- Preferred supplier status: awarded based on consistent A-grade performance
+  over 24 months. Benefits include early payment (Net 15) and volume guarantees.
+
+═══════════════════════════════════════════════════
+CHAPTER 5: COMPLIANCE & DOCUMENTATION
+═══════════════════════════════════════════════════
+
+5.1 Regulatory Requirements
+- All spare parts must comply with classification society rules (ABS, DNV GL, Lloyd's).
+- Safety equipment must hold valid SOLAS certification.
+- Environmental equipment must comply with MARPOL regulations.
+- Hazardous materials must include MSDS (Material Safety Data Sheet).
+
+5.2 Record Retention
+- Purchase orders: retained for 7 years.
+- Inspection records: retained for vessel's operational life.
+- Supplier contracts: retained for contract period + 5 years.
+- Certificates of conformity: retained for equipment operational life.
+
+5.3 Audit
+- Internal procurement audit: annually by Internal Audit department.
+- External audit: as part of annual ISO 9001 certification.
+- Port State Control inspections may review spare parts documentation.
+- All audit findings must be remediated within 60 days.

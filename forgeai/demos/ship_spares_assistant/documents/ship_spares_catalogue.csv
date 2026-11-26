@@ -1,0 +1,31 @@
+Part Number,Part Name,Category,Unit Price (USD),Stock Quantity,Minimum Order,Lead Time (Days),Supplier,Supplier Country,Weight (kg),Certification
+MRN-001,Marine Diesel Engine Filter,Engine,45.00,500,10,7,KleanFilter GmbH,Germany,0.8,ISO 8217
+MRN-002,Propeller Shaft Bearing,Propulsion,1250.00,25,1,21,Thordon Bearings Inc,Canada,15.5,DNV GL
+MRN-003,Navigation Light LED Set,Navigation,320.00,150,5,10,AquaSignal Ltd,UK,2.1,COLREG
+MRN-004,Fire Extinguisher 9kg CO2,Safety,185.00,200,10,5,Minimax GmbH,Germany,15.0,SOLAS
+MRN-005,Liferaft 25-Person,Safety,8500.00,15,1,30,Viking Life-Saving,Denmark,185.0,SOLAS
+MRN-006,Anchor Chain Grade 3 (per meter),Deck,78.00,2000,50,14,Dae Sun Anchor Chain,South Korea,32.0,IACS
+MRN-007,Marine VHF Radio,Communication,650.00,80,2,10,Icom Inc,Japan,1.2,ITU
+MRN-008,Hydraulic Steering Pump,Steering,2100.00,12,1,28,Rolls-Royce Marine,Norway,45.0,ABS
+MRN-009,Bilge Water Separator 5m³/h,Environmental,15000.00,5,1,45,Alfa Laval,Sweden,350.0,MARPOL
+MRN-010,Steel Plate A36 (per sheet),Hull,220.00,300,20,10,POSCO,South Korea,98.0,ASTM
+MRN-011,Zinc Anode Kit (10 pcs),Corrosion,180.00,400,5,7,MG Duff International,UK,12.0,MIL-A-18001
+MRN-012,Marine Coolant Pump 50m³/h,Engine,3200.00,8,1,21,KSB SE,Germany,65.0,ABS
+MRN-013,Cargo Hatch Cover Seal (per meter),Cargo,35.00,1500,100,14,MacGregor,Finland,0.3,IACS
+MRN-014,EPIRB Distress Beacon,Safety,980.00,30,2,7,ACR Electronics,USA,0.5,GMDSS
+MRN-015,Marine Paint Anti-fouling (20L),Maintenance,290.00,100,5,10,Jotun AS,Norway,22.0,AFS Convention
+MRN-016,Diesel Generator Set 500kW,Power,45000.00,3,1,60,Caterpillar Marine,USA,2500.0,ABS
+MRN-017,Air Compressor 30 Bar,Pneumatic,8900.00,6,1,35,Hamworthy Compressors,UK,320.0,DNV GL
+MRN-018,Mooring Rope HMPE 80mm,Deck,42.00,5000,200,14,Lankhorst Ropes,Netherlands,0.4,OCIMF
+MRN-019,Emergency Shower Unit,Safety,560.00,25,2,10,Hughes Safety,UK,18.0,ANSI Z358
+MRN-020,Fuel Flow Meter Digital,Engine,1800.00,20,1,14,Endress+Hauser,Switzerland,8.5,MID
+MRN-021,Lifeboat Davit Hydraulic,Safety,32000.00,2,1,90,Palfinger Marine,Norway,850.0,SOLAS
+MRN-022,Sewage Treatment Plant 50P,Environmental,28000.00,2,1,60,Wartsila,Finland,1200.0,MARPOL
+MRN-023,GPS Compass System,Navigation,4500.00,15,1,14,Furuno Electric,Japan,3.8,IMO
+MRN-024,Incinerator 500kg/h,Environmental,55000.00,1,1,120,TeamTec AS,Norway,3500.0,MARPOL
+MRN-025,Fresh Water Generator 25t/day,Utility,38000.00,3,1,75,Alfa Laval,Sweden,1800.0,ABS
+MRN-026,Exhaust Gas Economizer,Engine,22000.00,4,1,45,Aalborg Industries,Denmark,780.0,DNV GL
+MRN-027,Bow Thruster 1000kW,Propulsion,120000.00,1,1,120,Brunvoll AS,Norway,5500.0,DNV GL
+MRN-028,Radar System X-Band,Navigation,18500.00,5,1,21,JRC (Japan Radio Co),Japan,25.0,IMO
+MRN-029,Oily Water Monitor 15ppm,Environmental,6500.00,8,1,28,Rivertrace Ltd,UK,12.0,MARPOL
+MRN-030,Portable Gas Detector 4-in-1,Safety,850.00,50,5,7,Draeger Safety,Germany,0.6,ATEX

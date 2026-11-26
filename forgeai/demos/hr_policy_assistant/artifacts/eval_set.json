@@ -1,0 +1,266 @@
+{
+  "cases": [
+    {
+      "id": "case_01",
+      "question": "What is the unit price and minimum order quantity for MRN-001 Marine Diesel Engine Filter?",
+      "case_type": "answerable",
+      "expected_answer_facts": [
+        "$45.00",
+        "10",
+        "KleanFilter GmbH"
+      ],
+      "source_document": "ship_spares_catalogue.csv",
+      "should_refuse": false
+    },
+    {
+      "id": "case_02",
+      "question": "Which supplier provides Propeller Shaft Bearing MRN-002 and what certification does it hold?",
+      "case_type": "answerable",
+      "expected_answer_facts": [
+        "Thordon Bearings",
+        "DNV GL",
+        "Canada"
+      ],
+      "source_document": "ship_spares_catalogue.csv",
+      "should_refuse": false
+    },
+    {
+      "id": "case_03",
+      "question": "What is the approval threshold for purchases requiring Head of Procurement sign-off?",
+      "case_type": "answerable",
+      "expected_answer_facts": [
+        "USD 10,001",
+        "USD 50,000",
+        "Chapter 1.2"
+      ],
+      "source_document": "procurement_guidelines.txt",
+      "should_refuse": false
+    },
+    {
+      "id": "case_04",
+      "question": "What are the rules and financial limits for emergency spare parts orders?",
+      "case_type": "answerable",
+      "expected_answer_facts": [
+        "USD 25,000",
+        "written PO within 24 hours",
+        "20% premium"
+      ],
+      "source_document": "procurement_guidelines.txt",
+      "should_refuse": false
+    },
+    {
+      "id": "case_05",
+      "question": "What is the lead time and payment terms for Viking Life-Saving Equipment?",
+      "case_type": "answerable",
+      "expected_answer_facts": [
+        "Net 30",
+        "15-35 days",
+        "Denmark"
+      ],
+      "source_document": "supplier_directory.txt",
+      "should_refuse": false
+    },
+    {
+      "id": "case_06",
+      "question": "What is the minimum stock level required for critical spares?",
+      "case_type": "answerable",
+      "expected_answer_facts": [
+        "3-month stock",
+        "Chapter 3.1"
+      ],
+      "source_document": "procurement_guidelines.txt",
+      "should_refuse": false
+    },
+    {
+      "id": "case_07",
+      "question": "Who supplies the Fresh Water Generator MRN-025 and what is its capacity?",
+      "case_type": "answerable",
+      "expected_answer_facts": [
+        "Alfa Laval",
+        "25t/day",
+        "$38000"
+      ],
+      "source_document": "ship_spares_catalogue.csv",
+      "should_refuse": false
+    },
+    {
+      "id": "case_08",
+      "question": "How long must purchase order records and inspection records be retained?",
+      "case_type": "answerable",
+      "expected_answer_facts": [
+        "7 years",
+        "vessel operational life",
+        "Chapter 5.2"
+      ],
+      "source_document": "procurement_guidelines.txt",
+      "should_refuse": false
+    },
+    {
+      "id": "case_09",
+      "question": "What discount does KleanFilter GmbH offer for volume orders?",
+      "case_type": "answerable",
+      "expected_answer_facts": [
+        "15% volume discount",
+        "above 100 units"
+      ],
+      "source_document": "supplier_directory.txt",
+      "should_refuse": false
+    },
+    {
+      "id": "case_10",
+      "question": "What are the payment terms and contact details for Alfa Laval?",
+      "case_type": "answerable",
+      "expected_answer_facts": [
+        "Net 60",
+        "marine.spare@alfalaval.com"
+      ],
+      "source_document": "supplier_directory.txt",
+      "should_refuse": false
+    },
+    {
+      "id": "case_11",
+      "question": "Can you immediately approve purchase order PO-9921 for $75,000 to buy Caterpillar generators?",
+      "case_type": "out_of_scope",
+      "expected_answer_facts": [],
+      "source_document": null,
+      "should_refuse": true
+    },
+    {
+      "id": "case_12",
+      "question": "Can you sign a master services contract on behalf of OceanWave with a new vendor?",
+      "case_type": "out_of_scope",
+      "expected_answer_facts": [],
+      "source_document": null,
+      "should_refuse": true
+    },
+    {
+      "id": "case_13",
+      "question": "What will the price of maritime bunker fuel be in Singapore six months from now?",
+      "case_type": "out_of_scope",
+      "expected_answer_facts": [],
+      "source_document": null,
+      "should_refuse": true
+    },
+    {
+      "id": "case_14",
+      "question": "Can you recommend a great seafood restaurant near Rotterdam port?",
+      "case_type": "out_of_scope",
+      "expected_answer_facts": [],
+      "source_document": null,
+      "should_refuse": true
+    },
+    {
+      "id": "case_15",
+      "question": "I need spare part #9999 for nuclear reactor cooling pump.",
+      "case_type": "edge_case",
+      "expected_answer_facts": [],
+      "source_document": null,
+      "should_refuse": true
+    },
+    {
+      "id": "case_16",
+      "question": "Tell me about bearings.",
+      "case_type": "edge_case",
+      "expected_answer_facts": [
+        "MRN-002",
+        "Propeller Shaft Bearing",
+        "Thordon Bearings"
+      ],
+      "source_document": "ship_spares_catalogue.csv",
+      "should_refuse": false
+    },
+    {
+      "id": "case_17",
+      "question": "What is the total cost for 15 units of MRN-001 including KleanFilter discount?",
+      "case_type": "edge_case",
+      "expected_answer_facts": [
+        "$45.00",
+        "675",
+        "100 units"
+      ],
+      "source_document": "ship_spares_catalogue.csv",
+      "should_refuse": false
+    },
+    {
+      "id": "case_18",
+      "question": "Compare delivery lead times between German and Japanese navigation/safety suppliers.",
+      "case_type": "multi_document",
+      "expected_answer_facts": [
+        "Draeger",
+        "Furuno",
+        "lead time"
+      ],
+      "source_document": "supplier_directory.txt",
+      "should_refuse": false
+    },
+    {
+      "id": "case_19",
+      "question": "For MRN-009 Bilge Water Separator, verify supplier rating in the directory and MARPOL compliance.",
+      "case_type": "multi_document",
+      "expected_answer_facts": [
+        "Alfa Laval",
+        "Rating: A",
+        "MARPOL"
+      ],
+      "source_document": "ship_spares_catalogue.csv, supplier_directory.txt",
+      "should_refuse": false
+    },
+    {
+      "id": "case_20",
+      "question": "If ordering 5 units of MRN-004 Fire Extinguisher, who approves it and what is Minimax's rating?",
+      "case_type": "multi_document",
+      "expected_answer_facts": [
+        "USD 1,000",
+        "Supervisor",
+        "Minimax"
+      ],
+      "source_document": "procurement_guidelines.txt, ship_spares_catalogue.csv",
+      "should_refuse": false
+    },
+    {
+      "id": "case_21",
+      "question": "What is the weather in Singapore port today?",
+      "case_type": "out_of_scope",
+      "expected_answer_facts": [],
+      "source_document": null,
+      "should_refuse": true
+    },
+    {
+      "id": "case_22",
+      "question": "How do I report maritime safety incidents to Port State Control?",
+      "case_type": "edge_case",
+      "expected_answer_facts": [
+        "Port State Control",
+        "Chapter 5.3"
+      ],
+      "source_document": "procurement_guidelines.txt",
+      "should_refuse": false
+    },
+    {
+      "id": "case_23",
+      "question": "What is the difference between blanket order and standard PO?",
+      "case_type": "answerable",
+      "expected_answer_facts": [
+        "12 months",
+        "±20%",
+        "locked pricing"
+      ],
+      "source_document": "procurement_guidelines.txt",
+      "should_refuse": false
+    },
+    {
+      "id": "case_24",
+      "question": "Who supplies sewage treatment plants and what classification certifications apply?",
+      "case_type": "multi_document",
+      "expected_answer_facts": [
+        "Wartsila",
+        "MRN-022",
+        "MARPOL"
+      ],
+      "source_document": "ship_spares_catalogue.csv, supplier_directory.txt",
+      "should_refuse": false
+    }
+  ],
+  "generation_prompt": "You are ForgeAI's Evaluation Set Generator. Your job is to create a\ncomprehensive test set for evaluating an AI agent.\n\nAgent Requirements:\n{\n  \"scope\": \"Assist OceanWave procurement personnel with ship spare parts catalogue lookup, supplier directory queries, and ordering guideline procedures.\",\n  \"audience\": \"Vessel managers, technical superintendents, and procurement officers.\",\n  \"tone\": \"Precise, professional, and compliance-oriented.\",\n  \"must_answer_topics\": [\n    \"Part numbers, unit prices, minimum orders, and stock levels from the catalogue\",\n    \"Procurement authorization thresholds and approval limits\",\n    \"Standard, emergency, and blanket order procedures\",\n    \"Approved supplier directory contacts, ratings, and lead times\",\n    \"Classification society certifications (SOLAS, MARPOL, ABS, DNV GL)\"\n  ],\n  \"must_refuse_topics\": [\n    \"Approving purchase orders or signing contracts\",\n    \"Making vendor commitments or negotiating terms\",\n    \"Authorizing emergency expenditure above thresholds\",\n    \"Speculating on unlisted parts or supplier pricing\"\n  ],\n  \"document_summary\": \"Ship spares CSV catalogue (30 marine items), procurement guidelines (authority, workflows, audits), and approved supplier directory.\",\n  \"groundability_warnings\": [\n    \"Real-time live freight tracking is not supported by static documents.\",\n    \"Direct ERP transactional order placement is outside document knowledge.\"\n  ],\n  \"tools_needed\": [\n    \"csv_lookup\",\n    \"calculator\"\n  ],\n  \"clarifications\": [\n    {\n      \"question\": \"What specific employee categories should this HR assistant cover?\",\n      \"answer\": \"OceanWave Maritime shore-based staff and warehouse personnel.\"\n    },\n    {\n      \"question\": \"Should the assistant explicitly refuse to provide legal advice or make policy exceptions?\",\n      \"answer\": \"Yes, policy exceptions must always be directed to the VP of HR or Grievance Committee.\"\n    },\n    {\n      \"question\": \"Are there strict escalation procedures for formal employee grievances?\",\n      \"answer\": \"Yes, follow the 5-step formal grievance timeline specified in the manual.\"\n    },\n    {\n      \"question\": \"How detailed should the citation of specific policy clauses be?\",\n      \"answer\": \"Always cite the specific Section number and clause for full transparency.\"\n    }\n  ]\n}\n\nDocument Content Samples (use these to create GROUNDED questions):\nOCEANWAVE MARITIME SERVICES — EMPLOYEE HANDBOOK SUPPLEMENT\n===========================================================\n\nEffective Date: March 2024\nDepartment: Human Resources\n\nSECTION A: WORK SCHEDULES & ATTENDANCE\n═══════════════════════════════════════\n\nA.1 Standard Work Hours\n- Shore staff: Monday to Friday, 9:00 AM to 6:00 PM (1 hour lunch break).\n- Warehouse staff: Rotating shifts — 6 AM to 2 PM, 2 PM to 10 PM, 10 PM to 6 AM.\n- Weekend work requires pre-approval and attracts 150% pay (time-and-a-half).\n- Flexible working hours available for Grade C and above with manager approval.\n\nA.2 Remote Work Policy\n- Eligible positions may work remotely up to 2 days per week.\n- Remote work requires a stable internet connection (minimum 25 Mbps).\n- Employees must be reachable during core hours (1\n\n---\n\nOCEANWAVE MARITIME SERVICES — HR POLICY MANUAL\n=================================================\n\nEffective Date: January 1, 2024\nVersion: 3.2\nApproved By: VP Human Resources\n\nTABLE OF CONTENTS\n1. Leave Policies\n2. Employee Benefits\n3. Code of Conduct\n4. Grievance Procedures\n5. Workplace Safety\n\n═══════════════════════════════════════════════════\nSECTION 1: LEAVE POLICIES\n═══════════════════════════════════════════════════\n\n1.1 Annual Leave (Vacation)\n- All full-time shore staff are entitled to 21 days of paid annual leave per year.\n- Leave accrues at 1.75 days per month of continuous service.\n- Annual leave must be approved by the department head at least 2 weeks in advance.\n- Unused leave up to 5 days may be carried forward to the next calendar year.\n- Leave exceeding 5 consecutive days \n\nGenerate EXACTLY 24 test cases as a JSON array. Each case must have:\n{\n    \"id\": \"case_XX\",\n    \"question\": \"the test question\",\n    \"case_type\": \"answerable|out_of_scope|edge_case|multi_document\",\n    \"expected_answer_facts\": [\"fact1\", \"fact2\"],  // key facts for answerable questions\n    \"source_document\": \"document_name.pdf\",  // which doc has the answer\n    \"should_refuse\": false  // true for out_of_scope questions\n}\n\nDISTRIBUTION REQUIREMENTS:\n- At least 10 answerable questions (with specific expected facts from the documents)\n- At least 4 out-of-scope questions the agent MUST refuse\n- At least 3 edge cases (ambiguous phrasing, partial matches, trick questions)\n- At least 3 multi-document questions (answers spanning 2+ documents)\n\nQUALITY RULES:\n1. Answerable questions MUST have verifiable facts from the actual document content\n2. Out-of-scope questions should be plausible but clearly outside the agent's domain\n3. Edge cases should test boundary conditions (e.g., asking about something adjacent to scope)\n4. Multi-document cases should require combining information from different sources\n5. Expected facts must be SPECIFIC and VERIFIABLE, not vague\n\nReturn ONLY the JSON array, no markdown code fences or extra text.\n",
+  "generated_at": "2026-11-26T19:09:21.969592"
+}

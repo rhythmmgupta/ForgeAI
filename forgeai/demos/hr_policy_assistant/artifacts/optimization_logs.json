@@ -1,0 +1,24 @@
+[
+  {
+    "iteration": 1,
+    "change_type": "prompt_edit",
+    "description": "Strengthen citation formatting and tighten explicit boundary refusals for discretionary exceptions.",
+    "failures_addressed": [
+      "case_11",
+      "case_12"
+    ],
+    "score_before": 0.6582,
+    "score_after": 0.6582
+  },
+  {
+    "iteration": 1,
+    "change_type": "retrieval_param",
+    "description": "Adjust top_k to 6 to improve recall on multi-document correlation queries.",
+    "failures_addressed": [
+      "case_18",
+      "case_20"
+    ],
+    "score_before": 0.6582,
+    "score_after": 0.6582
+  }
+]
