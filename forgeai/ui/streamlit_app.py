@@ -395,7 +395,7 @@ def sidebar():
         else:
             provider = "gemini"
             api_key = st.text_input("Google AI Key", type="password", value=os.getenv("GOOGLE_API_KEY", ""))
-            model = st.selectbox("Model", ["gemini-2.0-flash", "gemini-1.5-flash"])
+            model = st.selectbox("Model", ["gemini-3.8-flash", "gemini-2.5-flash"])
 
         st.session_state.llm_provider = provider
         st.session_state.llm_model = model

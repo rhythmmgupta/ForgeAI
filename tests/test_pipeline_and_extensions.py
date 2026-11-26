@@ -13,7 +13,7 @@ from forgeai.core.regression_runner import RegressionRunner
 
 
 def test_intake_and_agent_generator(tmp_path):
-    cfg = ForgeAIConfig()
+    cfg = ForgeAIConfig(llm=LLMConfig(provider="simulator"))
     doc = tmp_path / "policy.txt"
     doc.write_text("Leave policy: 21 days annual leave, 12 days sick leave.")
 
@@ -32,7 +32,7 @@ def test_intake_and_agent_generator(tmp_path):
 
 
 def test_eval_generator_count(tmp_path):
-    cfg = ForgeAIConfig()
+    cfg = ForgeAIConfig(llm=LLMConfig(provider="simulator"))
     doc_samples = ["Annual leave is 21 days. Sick leave is 12 days.", "Health insurance is covered up to 5,00,000."]
     reqs = RequirementsDocument(
         scope="HR assistant",
@@ -60,7 +60,7 @@ def test_baseline_and_regression_execution(tmp_path):
     from forgeai.models import EvalSet
     eval_set_obj = EvalSet(**eval_set)
 
-    comparator = BaselineComparator()
+    comparator = BaselineComparator(ForgeAIConfig(llm=LLMConfig(provider="simulator")))
     comp_res = comparator.compare(
         factory_definition=factory_def,
         human_definition=HUMAN_BASELINE_HR_AGENT,

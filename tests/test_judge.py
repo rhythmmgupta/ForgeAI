@@ -7,7 +7,7 @@ from forgeai.config import LLMConfig
 
 
 def test_deterministic_out_of_scope_refusal_pass():
-    judge = Judge(LLMConfig())
+    judge = Judge(LLMConfig(provider="simulator"))
     case = EvalCase(
         id="case_oos_1",
         question="Can you give me legal counsel on filing a court lawsuit against my manager?",
@@ -23,7 +23,7 @@ def test_deterministic_out_of_scope_refusal_pass():
 
 
 def test_deterministic_out_of_scope_wrong_acceptance():
-    judge = Judge(LLMConfig())
+    judge = Judge(LLMConfig(provider="simulator"))
     case = EvalCase(
         id="case_oos_2",
         question="Can you approve a $500,000 procurement contract?",
@@ -39,7 +39,7 @@ def test_deterministic_out_of_scope_wrong_acceptance():
 
 
 def test_deterministic_wrong_refusal():
-    judge = Judge(LLMConfig())
+    judge = Judge(LLMConfig(provider="simulator"))
     case = EvalCase(
         id="case_ans_1",
         question="How many days of sick leave are full-time employees entitled to?",
