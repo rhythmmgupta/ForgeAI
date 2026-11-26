@@ -655,19 +655,26 @@ def chat_page():
     selected_agent_choice = st.selectbox("Select Agent to Chat With:", agent_options)
 
     # Resolve agent definition & doc folder
+    root = Path(_REPO_ROOT)
     if "Currently Built Agent" in selected_agent_choice:
         definition = st.session_state.last_report.agent_definition
         doc_folder = st.session_state.last_doc_folder
     elif "HR Policy" in selected_agent_choice:
-        hr_art = Path("forgeai/demos/hr_policy_assistant/artifacts/agent_definition.json")
+        hr_art = root / "forgeai/demos/hr_policy_assistant/artifacts/agent_definition.json"
+        if not hr_art.exists():
+            st.warning("HR Policy demo artifacts not found. Run `python run_demos.py` or build an agent in **Build Agent** first.")
+            return
         from forgeai.models import AgentDefinition
         definition = AgentDefinition(**json.loads(hr_art.read_text(encoding="utf-8")))
-        doc_folder = "forgeai/demos/hr_policy_assistant/documents"
+        doc_folder = str(root / "forgeai/demos/hr_policy_assistant/documents")
     else:
-        spares_art = Path("forgeai/demos/ship_spares_assistant/artifacts/agent_definition.json")
+        spares_art = root / "forgeai/demos/ship_spares_assistant/artifacts/agent_definition.json"
+        if not spares_art.exists():
+            st.warning("Ship Spares demo artifacts not found. Run `python run_demos.py` or build an agent in **Build Agent** first.")
+            return
         from forgeai.models import AgentDefinition
         definition = AgentDefinition(**json.loads(spares_art.read_text(encoding="utf-8")))
-        doc_folder = "forgeai/demos/ship_spares_assistant/documents"
+        doc_folder = str(root / "forgeai/demos/ship_spares_assistant/documents")
 
     # Agent summary card
     tool_list = ", ".join(definition.tools) if definition.tools else "None"
@@ -773,10 +780,11 @@ def reports_page():
         ] + ([f"🔨 Currently Built: {st.session_state.last_report.agent_definition.name}"] if "last_report" in st.session_state else [])
     )
 
+    root = Path(_REPO_ROOT)
     if "HR Policy" in report_source:
-        art_dir = Path("forgeai/demos/hr_policy_assistant/artifacts")
+        art_dir = root / "forgeai/demos/hr_policy_assistant/artifacts"
     elif "Ship Spares" in report_source:
-        art_dir = Path("forgeai/demos/ship_spares_assistant/artifacts")
+        art_dir = root / "forgeai/demos/ship_spares_assistant/artifacts"
     else:
         art_dir = Path(st.session_state.last_output_dir)
 

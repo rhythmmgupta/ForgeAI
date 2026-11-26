@@ -43,7 +43,7 @@ The Factory agent demonstrated systematic advantages in several key dimensions:
 - Version 3.0 — ..."*
 - **Case case_03 (answerable)**: *"What does employee_handbook_supplement.txt specify regarding Department: Human Resources?"*
   - Human Score: `0.00` | Factory Score: `0.97`
-  - Factory Answer Snippet: *"Based on the retrieved documents: - Department: Human Resources - Approved By: VP Human Resources **Sources:** ** employee_handbook_supplement.txt, hr_policy_manual.txt What does e..."*
+  - Factory Answer Snippet: *"Based on the retrieved documents: - Department: Human Resources - Approved By: VP Human Resources **Sources:** ** hr_policy_manual.txt, employee_handbook_supplement.txt What does e..."*
 - **Case case_04 (answerable)**: *"What does employee_handbook_supplement.txt specify regarding SECTION A: WORK SCHEDULES & ATTENDANCE?"*
   - Human Score: `0.00` | Factory Score: `0.97`
   - Factory Answer Snippet: *"Based on the retrieved documents: - SECTION A: WORK SCHEDULES & ATTENDANCE - Version 3.1 — July 2023: Added ergonomics section - SECTION 2: EMPLOYEE BENEFITS - SECTION 4: GRIEVANCE..."*

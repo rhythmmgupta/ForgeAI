@@ -13,7 +13,7 @@
       "case_type": "answerable",
       "human_score": 0.62,
       "factory_score": 0.97,
-      "human_response": "Based on the retrieved documents:\n\n- Version 3.2 \u2014 January 2024: Updated maternity leave to 26 weeks\n- Version 3.0 \u2014 January 2023: Major revision, consolidated all policies\n- Version 2.5 \u2014 June 2022: Updated health insurance limits\n\n**Sources:** ** e",
+      "human_response": "Based on the retrieved documents:\n\n- Version 3.2 \u2014 January 2024: Updated maternity leave to 26 weeks\n- Version 3.0 \u2014 January 2023: Major revision, consolidated all policies\n- Version 2.5 \u2014 June 2022: Updated health insurance limits\n\n**Sources:** ** h",
       "factory_response": "Based on the retrieved documents:\n\n- Effective Date: March 2024\n- Effective Date: January 1, 2024\n- Version 3.2 \u2014 January 2024: Updated maternity leave to 26 weeks\n- Version 3.0 \u2014 January 2023: Major revision, consolidated all policies\n\n**Sources:** ",
       "explanation": "Score difference: +0.35"
     },
@@ -24,7 +24,7 @@
       "human_score": 0.0,
       "factory_score": 0.97,
       "human_response": "I don't have information about that in my source documents.",
-      "factory_response": "Based on the retrieved documents: - Department: Human Resources - Approved By: VP Human Resources **Sources:** ** employee_handbook_supplement.txt, hr_policy_manual.txt What does employee_handbook_supplement.txt specify regarding Effective Date: Marc",
+      "factory_response": "Based on the retrieved documents: - Department: Human Resources - Approved By: VP Human Resources **Sources:** ** hr_policy_manual.txt, employee_handbook_supplement.txt What does employee_handbook_supplement.txt specify regarding Effective Date: Marc",
       "explanation": "Score difference: +0.97"
     },
     {
@@ -34,7 +34,7 @@
       "human_score": 0.0,
       "factory_score": 0.97,
       "human_response": "Based on the retrieved documents: - Version 3.1 \u2014 July 2023: Added ergonomics section - - Company property must be returned on the last working day. - SECTION D: SEPARATION & OFFBOARDING - - Exit interview conducted by HR on the last working day. **S",
-      "factory_response": "Based on the retrieved documents: - SECTION A: WORK SCHEDULES & ATTENDANCE - Version 3.1 \u2014 July 2023: Added ergonomics section - SECTION 2: EMPLOYEE BENEFITS - SECTION 4: GRIEVANCE PROCEDURES **Sources:** ** employee_handbook_supplement.txt, hr_polic",
+      "factory_response": "Based on the retrieved documents: - SECTION A: WORK SCHEDULES & ATTENDANCE - Version 3.1 \u2014 July 2023: Added ergonomics section - SECTION 2: EMPLOYEE BENEFITS - SECTION 4: GRIEVANCE PROCEDURES **Sources:** ** hr_policy_manual.txt, employee_handbook_su",
       "explanation": "Score difference: +0.97"
     },
     {
@@ -74,7 +74,7 @@
       "human_score": 0.0,
       "factory_score": 0.97,
       "human_response": "Based on the retrieved documents: - OCEANWAVE MARITIME SERVICES \u2014 EMPLOYEE HANDBOOK SUPPLEMENT =========================================================== Effective Date: March 2024 Department: Human Resources SECTION A: WORK SCHEDULES & ATTENDANCE \u2550",
-      "factory_response": "Based on the retrieved documents:\n\n- OCEANWAVE MARITIME SERVICES \u2014 EMPLOYEE HANDBOOK SUPPLEMENT\n- OCEANWAVE MARITIME SERVICES \u2014 HR POLICY MANUAL\n- 2. Employee Benefits\n- SECTION 2: EMPLOYEE BENEFITS\n\n**Sources:** employee_handbook_supplement.txt, hr_",
+      "factory_response": "Based on the retrieved documents:\n\n- OCEANWAVE MARITIME SERVICES \u2014 EMPLOYEE HANDBOOK SUPPLEMENT\n- OCEANWAVE MARITIME SERVICES \u2014 HR POLICY MANUAL\n- 2. Employee Benefits\n- SECTION 2: EMPLOYEE BENEFITS\n\n**Sources:** hr_policy_manual.txt, employee_handbo",
       "explanation": "Score difference: +0.97"
     },
     {
@@ -93,8 +93,8 @@
       "case_type": "multi_document",
       "human_score": 0.0,
       "factory_score": 0.97,
-      "human_response": "Based on the retrieved documents: - - Transfer between departments requires both managers' approval. **Sources:** ** ** ** ** ** ** ** employee_handbook_supplement.txt, hr_policy_manual.txt What does employee_handbook_supplement.txt specify regarding",
-      "factory_response": "Based on the retrieved documents: - Department: Human Resources - Approved By: VP Human Resources **Sources:** ** employee_handbook_supplement.txt, hr_policy_manual.txt Comparing hr_policy_manual.txt and employee_handbook_supplement.txt, what details",
+      "human_response": "Based on the retrieved documents: - - Transfer between departments requires both managers' approval. **Sources:** ** ** ** ** ** ** ** hr_policy_manual.txt, employee_handbook_supplement.txt What does employee_handbook_supplement.txt specify regarding",
+      "factory_response": "Based on the retrieved documents: - Department: Human Resources - Approved By: VP Human Resources **Sources:** ** hr_policy_manual.txt, employee_handbook_supplement.txt Comparing hr_policy_manual.txt and employee_handbook_supplement.txt, what details",
       "explanation": "Score difference: +0.97"
     }
   ],
