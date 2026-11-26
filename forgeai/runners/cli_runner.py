@@ -85,7 +85,9 @@ def run_cli_chat(
         console.print(f"\n[bold cyan]Agent:[/bold cyan]")
         console.print(Markdown(answer))
 
-        # Show source highlighting (stretch goal)
+        # Show tools & sources used
+        if getattr(runner, "last_tools_used", None):
+            console.print(f"[dim]🔧 Tools invoked: {', '.join(runner.last_tools_used)}[/dim]")
         if chunks:
             console.print(f"\n[dim]📄 Sources used ({len(chunks)} chunks):[/dim]")
             for i, chunk in enumerate(chunks[:3], 1):

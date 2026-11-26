@@ -1,0 +1,18 @@
+[
+  {
+    "question": "Who is the primary target audience for this assistant covering answers, policy, oceanwave, maritime?",
+    "answer": "Internal staff and stakeholders referenced in the brief (I need an assistant that answers HR policy questions for OceanWave Maritime shor)."
+  },
+  {
+    "question": "What tone and level of detail should responses follow when citing employee_handbook_supplement.txt, hr_policy_manual.txt?",
+    "answer": "Professional, clear, concise, and strictly grounded in the documents."
+  },
+  {
+    "question": "Are there specific edge cases or requests (such as approvals, exceptions, or external advice) that must be strictly refused?",
+    "answer": "Strictly refuse out-of-scope requests, unauthorized approvals, or topics not found in the documents."
+  },
+  {
+    "question": "Should responses always include explicit source filenames and section/row citations?",
+    "answer": "Yes, always cite the exact source document filename and relevant section or row."
+  }
+]

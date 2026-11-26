@@ -1,24 +1,102 @@
 [
   {
     "iteration": 1,
-    "change_type": "prompt_edit",
-    "description": "Strengthen citation formatting and tighten explicit boundary refusals for discretionary exceptions.",
+    "change_type": "retrieval_param",
+    "failure_category": "retrieval_miss",
+    "diagnosis": "Relevant facts were not captured in top_k retrieved chunks.",
+    "description": "Increase top_k by 3 and adjust chunk overlap to improve recall.",
+    "reason": "Expanding top_k and lowering score_threshold improves recall for multi-part queries.",
     "failures_addressed": [
-      "case_11",
-      "case_12"
+      "case_05",
+      "case_06",
+      "case_07",
+      "case_08",
+      "case_09",
+      "case_10"
     ],
-    "score_before": 0.6618,
-    "score_after": 0.6618
+    "score_before": 0.7686,
+    "score_after": 0.8161
   },
   {
     "iteration": 1,
-    "change_type": "retrieval_param",
-    "description": "Adjust top_k to 6 to improve recall on multi-document correlation queries.",
+    "change_type": "prompt_edit",
+    "failure_category": "prompt_defect",
+    "diagnosis": "Responses missed expected facts or boundary rules despite available context.",
+    "description": "Reinforce complete fact extraction from context and strict refusal boundaries.",
+    "reason": "Explicitly instructing complete fact extraction and strict refusal strengthens compliance.",
     "failures_addressed": [
-      "case_18",
-      "case_20"
+      "case_05",
+      "case_06",
+      "case_07",
+      "case_08",
+      "case_09",
+      "case_10"
     ],
-    "score_before": 0.6618,
-    "score_after": 0.6618
+    "score_before": 0.7686,
+    "score_after": 0.8161
+  },
+  {
+    "iteration": 2,
+    "change_type": "retrieval_param",
+    "failure_category": "retrieval_miss",
+    "diagnosis": "Relevant facts were not captured in top_k retrieved chunks.",
+    "description": "Increase top_k by 3 and adjust chunk overlap to improve recall.",
+    "reason": "Expanding top_k and lowering score_threshold improves recall for multi-part queries.",
+    "failures_addressed": [
+      "case_05",
+      "case_06",
+      "case_07",
+      "case_08",
+      "case_09"
+    ],
+    "score_before": 0.8161,
+    "score_after": 0.8638
+  },
+  {
+    "iteration": 2,
+    "change_type": "prompt_edit",
+    "failure_category": "prompt_defect",
+    "diagnosis": "Responses missed expected facts or boundary rules despite available context.",
+    "description": "Reinforce complete fact extraction from context and strict refusal boundaries.",
+    "reason": "Explicitly instructing complete fact extraction and strict refusal strengthens compliance.",
+    "failures_addressed": [
+      "case_05",
+      "case_06",
+      "case_07",
+      "case_08",
+      "case_09"
+    ],
+    "score_before": 0.8161,
+    "score_after": 0.8638
+  },
+  {
+    "iteration": 3,
+    "change_type": "retrieval_param",
+    "failure_category": "retrieval_miss",
+    "diagnosis": "Relevant facts were not captured in top_k retrieved chunks.",
+    "description": "Increase top_k by 3 and adjust chunk overlap to improve recall.",
+    "reason": "Expanding top_k and lowering score_threshold improves recall for multi-part queries.",
+    "failures_addressed": [
+      "case_05",
+      "case_07",
+      "case_08"
+    ],
+    "score_before": 0.8638,
+    "score_after": 0.7869
+  },
+  {
+    "iteration": 3,
+    "change_type": "prompt_edit",
+    "failure_category": "prompt_defect",
+    "diagnosis": "Responses missed expected facts or boundary rules despite available context.",
+    "description": "Reinforce complete fact extraction from context and strict refusal boundaries.",
+    "reason": "Explicitly instructing complete fact extraction and strict refusal strengthens compliance.",
+    "failures_addressed": [
+      "case_05",
+      "case_07",
+      "case_08"
+    ],
+    "score_before": 0.8638,
+    "score_after": 0.7869
   }
 ]

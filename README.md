@@ -195,18 +195,33 @@ LLM_MODEL=llama-3.3-70b-versatile
 
 ## Usage
 
-### Run Demo (Quickest Way to See ForgeAI in Action)
+### Single Reliable Setup Command
 
 ```bash
-# Run HR Policy Assistant demo
-python main.py --demo hr
+python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
+```
 
-# Run Ship Spares Procurement demo
-python main.py --demo spares
+### Single Reliable Demo Command
 
-# Run both demos (produces complete artifacts)
+```bash
+# Run both demos end-to-end (produces complete artifacts for HR & Ship Spares)
 python run_demos.py
 ```
+
+Expected output:
+- `HR Policy Assistant`: `78.7%` across 24 auto-generated eval cases (`tools: current_date`), artifacts in `forgeai/demos/hr_policy_assistant/artifacts/`
+- `Ship Spares Procurement Assistant`: `86.4%` across 24 auto-generated eval cases (`tools: csv_lookup, calculator`), artifacts in `forgeai/demos/ship_spares_assistant/artifacts/`
+
+### Single Reliable Unseen-Input Command
+
+```bash
+python -m forgeai.run_factory \
+  --brief path/to/brief.txt \
+  --documents path/to/documents \
+  --output path/to/output
+```
+
+(Also supports `--interactive`, `--human-checkpoint`, `--max-iterations`, and `--no-tournament`.)
 
 ### Build a Custom Agent
 

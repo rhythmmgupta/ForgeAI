@@ -14,10 +14,12 @@ except ImportError:
     from langchain.schema import HumanMessage, SystemMessage, AIMessage
 from langchain_community.vectorstores import FAISS
 
+from pathlib import Path
 from forgeai.config import LLMConfig, EmbeddingConfig, get_llm, get_embeddings
 from forgeai.models import AgentDefinition
 from forgeai.tools.registry import ToolRegistry
 from forgeai.core.document_processor import load_documents, chunk_documents, create_vector_store
+from forgeai.core.llm_utils import invoke_with_retry
 
 
 class AgentRunner:
@@ -37,7 +39,9 @@ class AgentRunner:
         self.definition = agent_definition
         self.llm = get_llm(llm_config)
         self.tool_registry = tool_registry or ToolRegistry()
+        self.doc_folder = doc_folder
         self.chat_history: List[Dict[str, str]] = []
+        self.last_tools_used: List[str] = []
         self.vector_store: Optional[FAISS] = None
 
         # Build vector store from documents
@@ -124,10 +128,16 @@ class AgentRunner:
 
         # 5. Generate response
         try:
-            response = self.llm.invoke(messages)
+            response = invoke_with_retry(self.llm, messages)
             answer = response.content
         except Exception as e:
             answer = f"I encountered an error processing your question: {str(e)}"
+
+        # Enforce output contract max_length if configured
+        max_words = self.definition.output_contract.max_length
+        if max_words and len(answer.split()) > max_words:
+            words = answer.split()[:max_words]
+            answer = " ".join(words) + "..."
 
         # 6. Update chat history
         self.chat_history.append({"role": "user", "content": question})
@@ -137,9 +147,11 @@ class AgentRunner:
 
     def _check_tools(self, question: str) -> str:
         """Check if any attached tools should be invoked for this question."""
+        self.last_tools_used = []
         if not self.definition.tools:
             return ""
 
+        import re
         results = []
         question_lower = question.lower()
 
@@ -148,27 +160,47 @@ class AgentRunner:
             if not tool:
                 continue
 
-            # Simple keyword matching to decide tool invocation
-            if tool_name == "current_date" and any(
-                w in question_lower for w in ["today", "current date", "what day", "date today"]
+            if tool_name == "csv_lookup":
+                csv_files = list(Path(self.doc_folder).glob("*.csv")) if self.doc_folder else []
+                if csv_files:
+                    # Extract candidate search terms (codes like MRN-001 or longest query words)
+                    codes = re.findall(r"\b[A-Za-z]{2,}-\d+\b", question)
+                    search_terms = codes or [
+                        w for w in re.findall(r"[A-Za-z0-9_-]{4,}", question_lower)
+                        if w not in {"what", "which", "where", "when", "does", "from", "with", "about", "this", "that"}
+                    ][:2]
+                    for csv_file in csv_files:
+                        for term in search_terms:
+                            res = self.tool_registry.execute_tool(
+                                "csv_lookup", file_path=str(csv_file), query=term
+                            )
+                            if "Found " in res:
+                                results.append(f"[{csv_file.name}]\n{res}")
+                                if "csv_lookup" not in self.last_tools_used:
+                                    self.last_tools_used.append("csv_lookup")
+                                break
+
+            elif tool_name == "current_date" and any(
+                w in question_lower for w in ["today", "current date", "what day", "date today", "deadline", "valid"]
             ):
                 results.append(self.tool_registry.execute_tool("current_date"))
+                self.last_tools_used.append("current_date")
 
             elif tool_name == "calculator" and any(
-                w in question_lower for w in ["calculate", "compute", "how much", "total", "sum"]
+                w in question_lower for w in ["calculate", "compute", "how much", "total", "sum", "cost"]
             ):
-                # Extract potential expression (basic)
-                import re
                 nums = re.findall(r'[\d.]+\s*[+\-*/]\s*[\d.]+', question)
                 if nums:
                     results.append(self.tool_registry.execute_tool("calculator", expression=nums[0]))
+                    self.last_tools_used.append("calculator")
 
             elif tool_name == "weather_api" and any(
-                w in question_lower for w in ["weather", "temperature", "wind"]
+                w in question_lower for w in ["weather", "temperature", "wind", "forecast"]
             ):
                 results.append(self.tool_registry.execute_tool(
                     "weather_api", location="requested location"
                 ))
+                self.last_tools_used.append("weather_api")
 
         return "\n".join(results)
 

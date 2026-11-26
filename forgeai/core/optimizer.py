@@ -18,6 +18,7 @@ from forgeai.models import (
     AgentDefinition, IterationScorecard, CaseScore,
     FailureCategory, OptimizationLog
 )
+from forgeai.core.llm_utils import invoke_with_retry
 
 
 CRITIC_PROMPT = """You are ForgeAI's Critic. Analyze the evaluation results and prescribe
@@ -118,7 +119,7 @@ class CriticOptimizer:
             ))
         ]
 
-        response = self.llm.invoke(messages)
+        response = invoke_with_retry(self.llm, messages)
         content = response.content.strip()
         if content.startswith("```"):
             content = content.split("\n", 1)[1].rsplit("```", 1)[0].strip()
@@ -176,7 +177,10 @@ class CriticOptimizer:
         return OptimizationLog(
             iteration=iteration,
             change_type=fix.get("change_type", "prompt_edit"),
+            failure_category=fix.get("failure_category", "prompt_defect"),
+            diagnosis=fix.get("diagnosis", fix.get("description", "")),
             description=fix.get("description", "No description"),
+            reason=fix.get("reason", "Targeted fix prescribed from evaluation failure breakdown"),
             failures_addressed=fix.get("failures_addressed", []),
             score_before=score_before,
             score_after=score_after

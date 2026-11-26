@@ -1,11 +1,102 @@
 {
-  "factory_score": 0.6618,
-  "human_score": 0.6384,
+  "factory_score": 0.7869,
+  "human_score": 0.5194,
   "factory_passed": 19,
-  "human_passed": 14,
-  "factory_wins_count": 0,
+  "human_passed": 11,
+  "factory_wins_count": 9,
   "human_wins_count": 0,
-  "ties_count": 24,
-  "factory_wins": [],
+  "ties_count": 15,
+  "factory_wins": [
+    {
+      "case_id": "case_02",
+      "question": "What does employee_handbook_supplement.txt specify regarding Effective Date: March 2024?",
+      "case_type": "answerable",
+      "human_score": 0.62,
+      "factory_score": 0.97,
+      "human_response": "Based on the retrieved documents:\n\n- Version 3.2 \u2014 January 2024: Updated maternity leave to 26 weeks\n- Version 3.0 \u2014 January 2023: Major revision, consolidated all policies\n- Version 2.5 \u2014 June 2022: Updated health insurance limits\n\n**Sources:** ** e",
+      "factory_response": "Based on the retrieved documents:\n\n- Effective Date: March 2024\n- Effective Date: January 1, 2024\n- Version 3.2 \u2014 January 2024: Updated maternity leave to 26 weeks\n- Version 3.0 \u2014 January 2023: Major revision, consolidated all policies\n\n**Sources:** ",
+      "explanation": "Score difference: +0.35"
+    },
+    {
+      "case_id": "case_03",
+      "question": "What does employee_handbook_supplement.txt specify regarding Department: Human Resources?",
+      "case_type": "answerable",
+      "human_score": 0.0,
+      "factory_score": 0.97,
+      "human_response": "I don't have information about that in my source documents.",
+      "factory_response": "Based on the retrieved documents: - Department: Human Resources - Approved By: VP Human Resources **Sources:** ** employee_handbook_supplement.txt, hr_policy_manual.txt What does employee_handbook_supplement.txt specify regarding Effective Date: Marc",
+      "explanation": "Score difference: +0.97"
+    },
+    {
+      "case_id": "case_04",
+      "question": "What does employee_handbook_supplement.txt specify regarding SECTION A: WORK SCHEDULES & ATTENDANCE?",
+      "case_type": "answerable",
+      "human_score": 0.0,
+      "factory_score": 0.97,
+      "human_response": "Based on the retrieved documents: - Version 3.1 \u2014 July 2023: Added ergonomics section - - Company property must be returned on the last working day. - SECTION D: SEPARATION & OFFBOARDING - - Exit interview conducted by HR on the last working day. **S",
+      "factory_response": "Based on the retrieved documents: - SECTION A: WORK SCHEDULES & ATTENDANCE - Version 3.1 \u2014 July 2023: Added ergonomics section - SECTION 2: EMPLOYEE BENEFITS - SECTION 4: GRIEVANCE PROCEDURES **Sources:** ** employee_handbook_supplement.txt, hr_polic",
+      "explanation": "Score difference: +0.97"
+    },
+    {
+      "case_id": "case_08",
+      "question": "What does employee_handbook_supplement.txt specify regarding - Flexible working hours available for Grade C?",
+      "case_type": "answerable",
+      "human_score": 0.5313,
+      "factory_score": 0.97,
+      "human_response": "Based on the retrieved documents: - \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 DOCUMENT REVISION HISTORY \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 Version 3.2 \u2014 January 2024: Updated maternity leave to 26 weeks Version 3.1 \u2014 July 2",
+      "factory_response": "Based on the retrieved documents: - - Flexible working hours available for Grade C and above with manager approval. - - Overtime: eligible employees (Grade A & B) receive 150% for overtime hours. - A.1 Standard Work Hours - - Ergonomic assessments av",
+      "explanation": "Score difference: +0.44"
+    },
+    {
+      "case_id": "case_09",
+      "question": "What does employee_handbook_supplement.txt specify regarding - Eligible positions may work remotely up to?",
+      "case_type": "answerable",
+      "human_score": 0.4533,
+      "factory_score": 0.6247,
+      "human_response": "Based on the retrieved documents: - What does employee_handbook_supplement.txt specify regarding - Flexible working hours available for Grade C? - \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 DOCUMENT REVISION HISTORY \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550",
+      "factory_response": "Based on the retrieved documents: - What does employee_handbook_supplement.txt specify regarding - Flexible working hours available for Grade C? - Based on the retrieved documents: - - Flexible working hours available for Grade C and above with manag",
+      "explanation": "Score difference: +0.17"
+    },
+    {
+      "case_id": "case_11",
+      "question": "What does hr_policy_manual.txt specify regarding OCEANWAVE MARITIME SERVICES \u2014 HR POLICY MANUAL?",
+      "case_type": "answerable",
+      "human_score": 0.36,
+      "factory_score": 0.97,
+      "human_response": "Based on the retrieved documents: - What does employee_handbook_supplement.txt specify regarding - Eligible positions may work remotely up to? - Based on the retrieved documents: - What does employee_handbook_supplement.txt specify regarding - Flexib",
+      "factory_response": "Based on the retrieved documents: - Based on the retrieved documents: - What does employee_handbook_supplement.txt specify regarding - Flexible working hours available for Grade C? - Based on the retrieved documents: - - Flexible working hours availa",
+      "explanation": "Score difference: +0.61"
+    },
+    {
+      "case_id": "case_18",
+      "question": "Comparing employee_handbook_supplement.txt and hr_policy_manual.txt, what details are provided regarding 'OCEANWAVE MARITIME SERVICES \u2014 EMPLOYEE HANDBO' and 'OCEANWAVE MARITIME SERVICES \u2014 HR POLICY MANUA'?",
+      "case_type": "multi_document",
+      "human_score": 0.0,
+      "factory_score": 0.97,
+      "human_response": "Based on the retrieved documents: - OCEANWAVE MARITIME SERVICES \u2014 EMPLOYEE HANDBOOK SUPPLEMENT =========================================================== Effective Date: March 2024 Department: Human Resources SECTION A: WORK SCHEDULES & ATTENDANCE \u2550",
+      "factory_response": "Based on the retrieved documents:\n\n- OCEANWAVE MARITIME SERVICES \u2014 EMPLOYEE HANDBOOK SUPPLEMENT\n- OCEANWAVE MARITIME SERVICES \u2014 HR POLICY MANUAL\n- 2. Employee Benefits\n- SECTION 2: EMPLOYEE BENEFITS\n\n**Sources:** employee_handbook_supplement.txt, hr_",
+      "explanation": "Score difference: +0.97"
+    },
+    {
+      "case_id": "case_19",
+      "question": "Comparing hr_policy_manual.txt and employee_handbook_supplement.txt, what details are provided regarding 'Effective Date: January 1, 2024' and 'Effective Date: March 2024'?",
+      "case_type": "multi_document",
+      "human_score": 0.0,
+      "factory_score": 0.97,
+      "human_response": "Based on the retrieved documents:\n\n- Version 3.2 \u2014 January 2024: Updated maternity leave to 26 weeks\n- Version 3.0 \u2014 January 2023: Major revision, consolidated all policies\n- Version 2.5 \u2014 June 2022: Updated health insurance limits\n- - Salaries are r",
+      "factory_response": "Based on the retrieved documents:\n\n- Effective Date: March 2024\n- Effective Date: January 1, 2024\n- Version 3.2 \u2014 January 2024: Updated maternity leave to 26 weeks\n- Version 3.0 \u2014 January 2023: Major revision, consolidated all policies\n\n**Sources:** ",
+      "explanation": "Score difference: +0.97"
+    },
+    {
+      "case_id": "case_20",
+      "question": "Comparing employee_handbook_supplement.txt and hr_policy_manual.txt, what details are provided regarding 'Department: Human Resources' and 'Approved By: VP Human Resources'?",
+      "case_type": "multi_document",
+      "human_score": 0.0,
+      "factory_score": 0.97,
+      "human_response": "Based on the retrieved documents: - - Transfer between departments requires both managers' approval. **Sources:** ** ** ** ** ** ** ** employee_handbook_supplement.txt, hr_policy_manual.txt What does employee_handbook_supplement.txt specify regarding",
+      "factory_response": "Based on the retrieved documents: - Department: Human Resources - Approved By: VP Human Resources **Sources:** ** employee_handbook_supplement.txt, hr_policy_manual.txt Comparing hr_policy_manual.txt and employee_handbook_supplement.txt, what details",
+      "explanation": "Score difference: +0.97"
+    }
+  ],
   "human_wins": []
 }

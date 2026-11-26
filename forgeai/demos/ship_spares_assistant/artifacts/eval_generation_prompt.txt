@@ -1,0 +1,149 @@
+You are ForgeAI's Evaluation Set Generator. Your job is to create a
+comprehensive test set for evaluating an AI agent.
+
+Agent Requirements:
+{
+  "scope": "I need a procurement assistant for OceanWave Maritime's ship spares department. It should help procurement officers look up parts from our catalogue, find supplier information, understand ordering procedures (standard, emergency, blanket orders), and check stock levels. It needs access to our CSV catalogue for part lookups and should be able to do basic cost calculations. It must refuse to approve purchase orders or make vendor commitments.",
+  "audience": "Users and stakeholders defined in the agent brief",
+  "tone": "Professional, clear, and strictly document-grounded",
+  "must_answer_topics": [
+    "standard",
+    "emergency",
+    "blanket orders",
+    "I need a procurement assistant for OceanWave Maritime's ship spares",
+    "It should help procurement officers look up parts from our",
+    "It needs access to our CSV catalogue for part lookups"
+  ],
+  "must_refuse_topics": [
+    "approve purchase orders or make vendor commitments"
+  ],
+  "required_capabilities": [
+    "I need a procurement assistant for OceanWave Maritime's ship spares department",
+    "It should help procurement officers look up parts from our catalogue, find supplier information, understand ordering procedures (standard, emergency, blanket orders), and check stock levels",
+    "It needs access to our CSV catalogue for part lookups and should be able to do basic cost calculations"
+  ],
+  "document_coverage": [
+    "procurement_guidelines.txt: Preview: OCEANWAVE MARITIME SERVICES \u2014 PROCUREMENT GUIDELINES =======================================================",
+    "ship_spares_catalogue.csv: Preview: Part Number: MRN-001 | Part Name: Marine Diesel Engine Filter | Category: Engine | Unit Price (USD): 45.00 | Stock Quantity: 500 | Minimum Order: 10 | ",
+    "supplier_directory.txt: Preview: OCEANWAVE MARITIME SERVICES \u2014 APPROVED SUPPLIER DIRECTORY ============================================================"
+  ],
+  "document_summary": "Knowledge base containing 3 file(s): procurement_guidelines.txt, ship_spares_catalogue.csv, supplier_directory.txt.",
+  "groundability_warnings": [],
+  "unsupported_requirements": [],
+  "tools_needed": [
+    "csv_lookup",
+    "calculator"
+  ],
+  "clarifications": [
+    {
+      "question": "Who is the primary target audience for this assistant covering procurement, oceanwave, maritime, ship?",
+      "answer": "Internal staff and stakeholders referenced in the brief (I need a procurement assistant for OceanWave Maritime's ship spares department. )."
+    },
+    {
+      "question": "What tone and level of detail should responses follow when citing procurement_guidelines.txt, ship_spares_catalogue.csv, supplier_directory.txt?",
+      "answer": "Professional, clear, concise, and strictly grounded in the documents."
+    },
+    {
+      "question": "Are there specific edge cases or requests (such as approvals, exceptions, or external advice) that must be strictly refused?",
+      "answer": "Strictly refuse out-of-scope requests, unauthorized approvals, or topics not found in the documents."
+    },
+    {
+      "question": "Should responses always include explicit source filenames and section/row citations?",
+      "answer": "Yes, always cite the exact source document filename and relevant section or row."
+    }
+  ]
+}
+
+Document Content Samples (use these to create GROUNDED questions):
+[Source: procurement_guidelines.txt]
+OCEANWAVE MARITIME SERVICES — PROCUREMENT GUIDELINES
+=======================================================
+
+Document: PROC-2024-001
+Effective: February 2024
+Classification: Internal
+
+═══════════════════════════════════════════════════
+CHAPTER 1: PROCUREMENT PROCESS OVERVIEW
+═══════════════════════════════════════════════════
+
+1.1 Purpose
+This document establishes the procurement procedures for ship spare parts,
+marine equipment, and vessel maintenance supplies for OceanWave Maritime Services.
+All procurement personnel must follow these guidelines to ensure cost-effective,
+timely, and compliant purchasing.
+
+1.2 Procurement Authority Levels
+- Up to USD 1,000: Approved by Department Supervisor
+- USD 1,001 to USD 10,000: Approved by Procurement Manager
+- 
+
+---
+
+[Source: ship_spares_catalogue.csv]
+Part Number: MRN-001 | Part Name: Marine Diesel Engine Filter | Category: Engine | Unit Price (USD): 45.00 | Stock Quantity: 500 | Minimum Order: 10 | Lead Time (Days): 7 | Supplier: KleanFilter GmbH | Supplier Country: Germany | Weight (kg): 0.8 | Certification: ISO 8217
+
+---
+
+[Source: ship_spares_catalogue.csv]
+Part Number: MRN-002 | Part Name: Propeller Shaft Bearing | Category: Propulsion | Unit Price (USD): 1250.00 | Stock Quantity: 25 | Minimum Order: 1 | Lead Time (Days): 21 | Supplier: Thordon Bearings Inc | Supplier Country: Canada | Weight (kg): 15.5 | Certification: DNV GL
+
+---
+
+[Source: ship_spares_catalogue.csv]
+Part Number: MRN-003 | Part Name: Navigation Light LED Set | Category: Navigation | Unit Price (USD): 320.00 | Stock Quantity: 150 | Minimum Order: 5 | Lead Time (Days): 10 | Supplier: AquaSignal Ltd | Supplier Country: UK | Weight (kg): 2.1 | Certification: COLREG
+
+---
+
+[Source: ship_spares_catalogue.csv]
+Part Number: MRN-004 | Part Name: Fire Extinguisher 9kg CO2 | Category: Safety | Unit Price (USD): 185.00 | Stock Quantity: 200 | Minimum Order: 10 | Lead Time (Days): 5 | Supplier: Minimax GmbH | Supplier Country: Germany | Weight (kg): 15.0 | Certification: SOLAS
+
+---
+
+[Source: ship_spares_catalogue.csv]
+Part Number: MRN-005 | Part Name: Liferaft 25-Person | Category: Safety | Unit Price (USD): 8500.00 | Stock Quantity: 15 | Minimum Order: 1 | Lead Time (Days): 30 | Supplier: Viking Life-Saving | Supplier Country: Denmark | Weight (kg): 185.0 | Certification: SOLAS
+
+---
+
+[Source: ship_spares_catalogue.csv]
+Part Number: MRN-006 | Part Name: Anchor Chain Grade 3 (per meter) | Category: Deck | Unit Price (USD): 78.00 | Stock Quantity: 2000 | Minimum Order: 50 | Lead Time (Days): 14 | Supplier: Dae Sun Anchor Chain | Supplier Country: South Korea | Weight (kg): 32.0 | Certification: IACS
+
+---
+
+[Source: ship_spares_catalogue.csv]
+Part Number: MRN-007 | Part Name: Marine VHF Radio | Category: Communication | Unit Price (USD): 650.00 | Stock Quantity: 80 | Minimum Order: 2 | Lead Time (Days): 10 | Supplier: Icom Inc | Supplier Country: Japan | Weight (kg): 1.2 | Certification: ITU
+
+---
+
+[Source: ship_spares_catalogue.csv]
+Part Number: MRN-008 | Part Name: Hydraulic Steering Pump | Category: Steering | Unit Price (USD): 2100.00 | Stock Quantity: 12 | Minimum Order: 1 | Lead Time (Days): 28 | Supplier: Rolls-Royce Marine | Supplier Country: Norway | Weight (kg): 45.0 | Certification: ABS
+
+---
+
+[Source: ship_spares_catalogue.csv]
+Part Number: MRN-009 | Part Name: Bilge Water Separator 5m³/h | Category: Environmental | Unit Price (USD): 15000.00 | Stock Quantity: 5 | Minimum Order: 1 | Lead Time (Days): 45 | Supplier: Alfa Laval | Supplier Country: Sweden | Weight (kg): 350.0 | Certification: MARPOL
+
+Generate EXACTLY 24 test cases as a JSON array. Each case must have:
+{
+    "id": "case_XX",
+    "question": "the test question",
+    "case_type": "answerable|out_of_scope|edge_case|multi_document",
+    "expected_answer_facts": ["fact1", "fact2"],  // key facts for answerable questions
+    "source_document": "document_name.pdf",  // which doc has the answer
+    "should_refuse": false  // true for out_of_scope questions
+}
+
+DISTRIBUTION REQUIREMENTS:
+- At least 10 answerable questions (with specific expected facts from the documents)
+- At least 4 out-of-scope questions the agent MUST refuse
+- At least 3 edge cases (ambiguous phrasing, partial matches, trick questions)
+- At least 3 multi-document questions (answers spanning 2+ documents)
+
+QUALITY RULES:
+1. Answerable questions MUST have verifiable facts from the actual document content
+2. Out-of-scope questions should be plausible but clearly outside the agent's domain
+3. Edge cases should test boundary conditions (e.g., asking about something adjacent to scope)
+4. Multi-document cases should require combining information from different sources
+5. Expected facts must be SPECIFIC and VERIFIABLE, not vague
+
+Return ONLY the JSON array, no markdown code fences or extra text.

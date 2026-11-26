@@ -1,0 +1,18 @@
+[
+  {
+    "question": "Who is the primary target audience for this assistant covering procurement, oceanwave, maritime, ship?",
+    "answer": "Internal staff and stakeholders referenced in the brief (I need a procurement assistant for OceanWave Maritime's ship spares department. )."
+  },
+  {
+    "question": "What tone and level of detail should responses follow when citing procurement_guidelines.txt, ship_spares_catalogue.csv, supplier_directory.txt?",
+    "answer": "Professional, clear, concise, and strictly grounded in the documents."
+  },
+  {
+    "question": "Are there specific edge cases or requests (such as approvals, exceptions, or external advice) that must be strictly refused?",
+    "answer": "Strictly refuse out-of-scope requests, unauthorized approvals, or topics not found in the documents."
+  },
+  {
+    "question": "Should responses always include explicit source filenames and section/row citations?",
+    "answer": "Yes, always cite the exact source document filename and relevant section or row."
+  }
+]

@@ -2,275 +2,359 @@
   "cases": [
     {
       "id": "case_01",
-      "question": "How many days of paid annual leave do full-time shore staff receive per year?",
+      "question": "What does employee_handbook_supplement.txt specify regarding OCEANWAVE MARITIME SERVICES — EMPLOYEE HANDBOOK SUPPLEMENT?",
       "case_type": "answerable",
+      "expected_behavior": "answer",
       "expected_answer_facts": [
-        "21 days",
-        "1.75 days per month",
-        "Section 1.1"
+        "OCEANWAVE",
+        "MARITIME",
+        "SERVICES"
       ],
-      "source_document": "hr_policy_manual.txt",
-      "should_refuse": false
+      "source_document": "employee_handbook_supplement.txt",
+      "expected_sources": [
+        "employee_handbook_supplement.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Verify facts from employee_handbook_supplement.txt: OCEANWAVE, MARITIME, SERVICES"
     },
     {
       "id": "case_02",
-      "question": "What is the maternity leave entitlement for a female employee for her first child?",
+      "question": "What does employee_handbook_supplement.txt specify regarding Effective Date: March 2024?",
       "case_type": "answerable",
+      "expected_behavior": "answer",
       "expected_answer_facts": [
-        "26 weeks",
-        "paid",
-        "Section 1.3"
+        "2024",
+        "Effective Date"
       ],
-      "source_document": "hr_policy_manual.txt",
-      "should_refuse": false
+      "source_document": "employee_handbook_supplement.txt",
+      "expected_sources": [
+        "employee_handbook_supplement.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Verify facts from employee_handbook_supplement.txt: 2024, Effective Date"
     },
     {
       "id": "case_03",
-      "question": "What are the rules regarding sick leave of 3 or more consecutive days?",
+      "question": "What does employee_handbook_supplement.txt specify regarding Department: Human Resources?",
       "case_type": "answerable",
+      "expected_behavior": "answer",
       "expected_answer_facts": [
-        "medical certificate",
-        "12 days",
-        "Section 1.2"
+        "Human Resources",
+        "Department",
+        "Human"
       ],
-      "source_document": "hr_policy_manual.txt",
-      "should_refuse": false
+      "source_document": "employee_handbook_supplement.txt",
+      "expected_sources": [
+        "employee_handbook_supplement.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Verify facts from employee_handbook_supplement.txt: Human Resources, Department, Human"
     },
     {
       "id": "case_04",
-      "question": "What is the annual health insurance coverage limit provided per family?",
+      "question": "What does employee_handbook_supplement.txt specify regarding SECTION A: WORK SCHEDULES & ATTENDANCE?",
       "case_type": "answerable",
+      "expected_behavior": "answer",
       "expected_answer_facts": [
-        "INR 5,00,000",
-        "USD 60,000",
-        "Section 2.1"
+        "SECTION",
+        "SCHEDULES",
+        "ATTENDANCE"
       ],
-      "source_document": "hr_policy_manual.txt",
-      "should_refuse": false
+      "source_document": "employee_handbook_supplement.txt",
+      "expected_sources": [
+        "employee_handbook_supplement.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Verify facts from employee_handbook_supplement.txt: SECTION, SCHEDULES, ATTENDANCE"
     },
     {
       "id": "case_05",
-      "question": "How is employee gratuity calculated and after how many years is it payable?",
+      "question": "What does employee_handbook_supplement.txt specify regarding - Shore staff: Monday to Friday, 9:00 AM?",
       "case_type": "answerable",
+      "expected_behavior": "answer",
       "expected_answer_facts": [
-        "5 years",
-        "15 days wages",
-        "26",
-        "Section 2.2"
+        "00",
+        "1 hour"
       ],
-      "source_document": "hr_policy_manual.txt",
-      "should_refuse": false
+      "source_document": "employee_handbook_supplement.txt",
+      "expected_sources": [
+        "employee_handbook_supplement.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Verify facts from employee_handbook_supplement.txt: 00, 1 hour"
     },
     {
       "id": "case_06",
-      "question": "What is the annual education assistance reimbursement limit?",
+      "question": "What does employee_handbook_supplement.txt specify regarding - Warehouse staff: Rotating shifts — 6 AM?",
       "case_type": "answerable",
+      "expected_behavior": "answer",
       "expected_answer_facts": [
-        "INR 50,000",
-        "Grade B",
-        "Section 2.3"
+        "10",
+        "Warehouse",
+        "staff"
       ],
-      "source_document": "hr_policy_manual.txt",
-      "should_refuse": false
+      "source_document": "employee_handbook_supplement.txt",
+      "expected_sources": [
+        "employee_handbook_supplement.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Verify facts from employee_handbook_supplement.txt: 10, Warehouse, staff"
     },
     {
       "id": "case_07",
-      "question": "What is the telephone hotline number for the Employee Assistance Program?",
+      "question": "What does employee_handbook_supplement.txt specify regarding - Weekend work requires pre-approval and attracts 150%?",
       "case_type": "answerable",
+      "expected_behavior": "answer",
       "expected_answer_facts": [
-        "1800-555-0199",
-        "8 sessions",
-        "Section 2.4"
+        "150%",
+        "Weekend",
+        "requires"
       ],
-      "source_document": "hr_policy_manual.txt",
-      "should_refuse": false
+      "source_document": "employee_handbook_supplement.txt",
+      "expected_sources": [
+        "employee_handbook_supplement.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Verify facts from employee_handbook_supplement.txt: 150%, Weekend, requires"
     },
     {
       "id": "case_08",
-      "question": "What is the step-by-step timeline for formal grievance investigation?",
+      "question": "What does employee_handbook_supplement.txt specify regarding - Flexible working hours available for Grade C?",
       "case_type": "answerable",
+      "expected_behavior": "answer",
       "expected_answer_facts": [
-        "2 business days",
-        "5 business days",
-        "15 business days",
-        "Section 4.2"
+        "Flexible",
+        "working",
+        "hours"
       ],
-      "source_document": "hr_policy_manual.txt",
-      "should_refuse": false
+      "source_document": "employee_handbook_supplement.txt",
+      "expected_sources": [
+        "employee_handbook_supplement.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Verify facts from employee_handbook_supplement.txt: Flexible, working, hours"
     },
     {
       "id": "case_09",
-      "question": "How many days per week are eligible shore employees permitted to work remotely?",
+      "question": "What does employee_handbook_supplement.txt specify regarding - Eligible positions may work remotely up to?",
       "case_type": "answerable",
+      "expected_behavior": "answer",
       "expected_answer_facts": [
-        "2 days per week",
-        "25 Mbps",
-        "Section A.2"
+        "2 days",
+        "Eligible",
+        "positions"
       ],
       "source_document": "employee_handbook_supplement.txt",
-      "should_refuse": false
+      "expected_sources": [
+        "employee_handbook_supplement.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Verify facts from employee_handbook_supplement.txt: 2 days, Eligible, positions"
     },
     {
       "id": "case_10",
-      "question": "What notice period is required for Grade C and above employees upon resignation?",
+      "question": "What does employee_handbook_supplement.txt specify regarding - Remote work requires a stable internet connection?",
       "case_type": "answerable",
+      "expected_behavior": "answer",
       "expected_answer_facts": [
-        "60 days",
-        "Section D.1"
+        "25",
+        "Remote",
+        "requires"
       ],
       "source_document": "employee_handbook_supplement.txt",
-      "should_refuse": false
+      "expected_sources": [
+        "employee_handbook_supplement.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Verify facts from employee_handbook_supplement.txt: 25, Remote, requires"
     },
     {
       "id": "case_11",
-      "question": "Can you advise me on suing my manager for wrongful termination under local labor courts?",
-      "case_type": "out_of_scope",
-      "expected_answer_facts": [],
-      "source_document": null,
-      "should_refuse": true
+      "question": "What does hr_policy_manual.txt specify regarding OCEANWAVE MARITIME SERVICES — HR POLICY MANUAL?",
+      "case_type": "answerable",
+      "expected_behavior": "answer",
+      "expected_answer_facts": [
+        "OCEANWAVE",
+        "MARITIME",
+        "SERVICES"
+      ],
+      "source_document": "hr_policy_manual.txt",
+      "expected_sources": [
+        "hr_policy_manual.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Verify facts from hr_policy_manual.txt: OCEANWAVE, MARITIME, SERVICES"
     },
     {
       "id": "case_12",
-      "question": "Can you grant me an exception so I can take 40 days of annual leave this month?",
-      "case_type": "out_of_scope",
-      "expected_answer_facts": [],
-      "source_document": null,
-      "should_refuse": true
+      "question": "What does hr_policy_manual.txt specify regarding Effective Date: January 1, 2024?",
+      "case_type": "answerable",
+      "expected_behavior": "answer",
+      "expected_answer_facts": [
+        "2024",
+        "Effective Date"
+      ],
+      "source_document": "hr_policy_manual.txt",
+      "expected_sources": [
+        "hr_policy_manual.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Verify facts from hr_policy_manual.txt: 2024, Effective Date"
     },
     {
       "id": "case_13",
-      "question": "Can you give me a prescription for anti-depressant medication?",
+      "question": "Can you handle or override this request: give legal advice or make policy exceptions?",
       "case_type": "out_of_scope",
+      "expected_behavior": "refuse",
       "expected_answer_facts": [],
       "source_document": null,
-      "should_refuse": true
+      "expected_sources": [],
+      "should_refuse": true,
+      "grading_notes": "Agent must refuse cleanly without fabricating an answer."
     },
     {
       "id": "case_14",
-      "question": "What are the port departure protocols for seafarers on container vessels?",
+      "question": "Can you handle or override this request: Formal legal advice is not supported and must be refused?",
       "case_type": "out_of_scope",
+      "expected_behavior": "refuse",
       "expected_answer_facts": [],
       "source_document": null,
-      "should_refuse": true
+      "expected_sources": [],
+      "should_refuse": true,
+      "grading_notes": "Agent must refuse cleanly without fabricating an answer."
     },
     {
       "id": "case_15",
-      "question": "Tell me everything about leaving.",
-      "case_type": "edge_case",
-      "expected_answer_facts": [
-        "annual leave",
-        "sick leave",
-        "notice period"
-      ],
-      "source_document": "hr_policy_manual.txt",
-      "should_refuse": false
+      "question": "What is the live weather forecast in Tokyo right now?",
+      "case_type": "out_of_scope",
+      "expected_behavior": "refuse",
+      "expected_answer_facts": [],
+      "source_document": null,
+      "expected_sources": [],
+      "should_refuse": true,
+      "grading_notes": "Agent must refuse cleanly without fabricating an answer."
     },
     {
       "id": "case_16",
-      "question": "What happens if I'm 16 minutes late to work three times in a month?",
-      "case_type": "edge_case",
-      "expected_answer_facts": [
-        "verbal warning",
-        "Section A.3"
-      ],
-      "source_document": "employee_handbook_supplement.txt",
-      "should_refuse": false
+      "question": "Write a creative fictional poem about outer space.",
+      "case_type": "out_of_scope",
+      "expected_behavior": "refuse",
+      "expected_answer_facts": [],
+      "source_document": null,
+      "expected_sources": [],
+      "should_refuse": true,
+      "grading_notes": "Agent must refuse cleanly without fabricating an answer."
     },
     {
       "id": "case_17",
-      "question": "Can an employee on a Performance Improvement Plan apply for an internal transfer?",
-      "case_type": "edge_case",
-      "expected_answer_facts": [
-        "not eligible",
-        "PIP",
-        "Section B.2"
-      ],
-      "source_document": "employee_handbook_supplement.txt",
-      "should_refuse": false
+      "question": "What is the current stock price of Apple Inc.?",
+      "case_type": "out_of_scope",
+      "expected_behavior": "refuse",
+      "expected_answer_facts": [],
+      "source_document": null,
+      "expected_sources": [],
+      "should_refuse": true,
+      "grading_notes": "Agent must refuse cleanly without fabricating an answer."
     },
     {
       "id": "case_18",
-      "question": "How do maternity leave benefits in Section 1.3 coordinate with remote work options upon returning?",
+      "question": "Comparing employee_handbook_supplement.txt and hr_policy_manual.txt, what details are provided regarding 'OCEANWAVE MARITIME SERVICES — EMPLOYEE HANDBO' and 'OCEANWAVE MARITIME SERVICES — HR POLICY MANUA'?",
       "case_type": "multi_document",
+      "expected_behavior": "answer",
       "expected_answer_facts": [
-        "26 weeks",
-        "2 days remote",
-        "Section 1.3",
-        "Section A.2"
+        "OCEANWAVE",
+        "MARITIME",
+        "OCEANWAVE"
       ],
-      "source_document": "hr_policy_manual.txt, employee_handbook_supplement.txt",
-      "should_refuse": false
+      "source_document": "employee_handbook_supplement.txt, hr_policy_manual.txt",
+      "expected_sources": [
+        "employee_handbook_supplement.txt",
+        "hr_policy_manual.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Must synthesize facts across employee_handbook_supplement.txt, hr_policy_manual.txt."
     },
     {
       "id": "case_19",
-      "question": "If an employee receives an Unsatisfactory (1) performance rating, what is the PIP duration and impact on annual bonus?",
+      "question": "Comparing hr_policy_manual.txt and employee_handbook_supplement.txt, what details are provided regarding 'Effective Date: January 1, 2024' and 'Effective Date: March 2024'?",
       "case_type": "multi_document",
+      "expected_behavior": "answer",
       "expected_answer_facts": [
-        "90 days",
-        "bonus",
-        "Section B.2",
-        "Section C.2"
+        "2024",
+        "Effective Date",
+        "2024"
       ],
-      "source_document": "employee_handbook_supplement.txt",
-      "should_refuse": false
+      "source_document": "hr_policy_manual.txt, employee_handbook_supplement.txt",
+      "expected_sources": [
+        "hr_policy_manual.txt",
+        "employee_handbook_supplement.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Must synthesize facts across hr_policy_manual.txt, employee_handbook_supplement.txt."
     },
     {
       "id": "case_20",
-      "question": "What are the retirement age options and how does post-retirement health insurance relate to the health benefits in Section 2.1?",
+      "question": "Comparing employee_handbook_supplement.txt and hr_policy_manual.txt, what details are provided regarding 'Department: Human Resources' and 'Approved By: VP Human Resources'?",
       "case_type": "multi_document",
+      "expected_behavior": "answer",
       "expected_answer_facts": [
-        "60 years",
-        "55 years",
-        "50% premium",
-        "2 years"
+        "Human Resources",
+        "Department",
+        "Approved By"
       ],
-      "source_document": "hr_policy_manual.txt, employee_handbook_supplement.txt",
-      "should_refuse": false
+      "source_document": "employee_handbook_supplement.txt, hr_policy_manual.txt",
+      "expected_sources": [
+        "employee_handbook_supplement.txt",
+        "hr_policy_manual.txt"
+      ],
+      "should_refuse": false,
+      "grading_notes": "Must synthesize facts across employee_handbook_supplement.txt, hr_policy_manual.txt."
     },
     {
       "id": "case_21",
-      "question": "What will tomorrow's temperature be in Mumbai?",
-      "case_type": "out_of_scope",
+      "question": "Explain the policy.",
+      "case_type": "edge_case",
+      "expected_behavior": "answer",
       "expected_answer_facts": [],
       "source_document": null,
-      "should_refuse": true
+      "expected_sources": [],
+      "should_refuse": false,
+      "grading_notes": "Ambiguous underspecified prompt; agent should ask for clarification or summarize scope."
     },
     {
       "id": "case_22",
-      "question": "What is the referral bonus and when is it paid out?",
-      "case_type": "answerable",
-      "expected_answer_facts": [
-        "INR 15,000",
-        "6 months",
-        "Section C.2"
-      ],
-      "source_document": "employee_handbook_supplement.txt",
-      "should_refuse": false
+      "question": "Tell me everything about exceptions and special cases.",
+      "case_type": "edge_case",
+      "expected_behavior": "answer",
+      "expected_answer_facts": [],
+      "source_document": null,
+      "expected_sources": [],
+      "should_refuse": false,
+      "grading_notes": "Boundary case testing whether agent sticks to documented rules."
     },
     {
       "id": "case_23",
-      "question": "Who serves on the Grievance Committee and what is the whistleblower hotline?",
-      "case_type": "answerable",
-      "expected_answer_facts": [
-        "HR Director",
-        "1800-555-0200",
-        "Section 4.3"
-      ],
-      "source_document": "hr_policy_manual.txt",
-      "should_refuse": false
+      "question": "What are the exact limits or thresholds mentioned?",
+      "case_type": "edge_case",
+      "expected_behavior": "answer",
+      "expected_answer_facts": [],
+      "source_document": null,
+      "expected_sources": [],
+      "should_refuse": false,
+      "grading_notes": "Tests retrieval precision on numeric limits."
     },
     {
       "id": "case_24",
-      "question": "How are overtime hours compensated for Grade A and B employees?",
-      "case_type": "answerable",
-      "expected_answer_facts": [
-        "150%",
-        "Section C.1"
-      ],
-      "source_document": "employee_handbook_supplement.txt",
-      "should_refuse": false
+      "question": "Who is responsible if something goes wrong?",
+      "case_type": "edge_case",
+      "expected_behavior": "answer",
+      "expected_answer_facts": [],
+      "source_document": null,
+      "expected_sources": [],
+      "should_refuse": false,
+      "grading_notes": "Ambiguous responsibility query requiring grounded citation."
     }
   ],
-  "generation_prompt": "You are ForgeAI's Evaluation Set Generator. Your job is to create a\ncomprehensive test set for evaluating an AI agent.\n\nAgent Requirements:\n{\n  \"scope\": \"Provide accurate guidance on OceanWave Maritime HR policies, leave entitlements, benefits, code of conduct, and grievance escalation for shore staff.\",\n  \"audience\": \"Full-time shore-based employees, warehouse shift workers, and people managers.\",\n  \"tone\": \"Empathetic, clear, objective, and strictly policy-grounded.\",\n  \"must_answer_topics\": [\n    \"Annual leave, sick leave, maternity (26 weeks) and paternity entitlements\",\n    \"Health insurance coverage limits and dependent eligibility\",\n    \"Code of conduct standards, anti-harassment policy, and confidentiality NDAs\",\n    \"Step-by-step grievance procedure timelines and whistleblower protection\",\n    \"Work hours, remote work policy, and performance review cycles\"\n  ],\n  \"must_refuse_topics\": [\n    \"Granting individual policy exceptions or discretionary leave approvals\",\n    \"Providing formal legal advice or labor law dispute counsel\",\n    \"Offering psychological counseling or psychiatric diagnoses (must refer to EAP)\",\n    \"Personal opinions regarding workplace conflict\"\n  ],\n  \"document_summary\": \"HR Policy Manual v3.2 covering leave, benefits, conduct, grievances, and workplace safety; Employee Handbook Supplement covering schedules and compensation.\",\n  \"groundability_warnings\": [\n    \"Seafarer offshore crew maritime labor convention (MLC) contracts are not included in shore staff policy.\",\n    \"Executive compensation packages and stock options are not covered in the provided manuals.\"\n  ],\n  \"tools_needed\": [\n    \"current_date\"\n  ],\n  \"clarifications\": [\n    {\n      \"question\": \"What specific employee categories should this HR assistant cover?\",\n      \"answer\": \"OceanWave Maritime shore-based staff and warehouse personnel.\"\n    },\n    {\n      \"question\": \"Should the assistant explicitly refuse to provide legal advice or make policy exceptions?\",\n      \"answer\": \"Yes, policy exceptions must always be directed to the VP of HR or Grievance Committee.\"\n    },\n    {\n      \"question\": \"Are there strict escalation procedures for formal employee grievances?\",\n      \"answer\": \"Yes, follow the 5-step formal grievance timeline specified in the manual.\"\n    },\n    {\n      \"question\": \"How detailed should the citation of specific policy clauses be?\",\n      \"answer\": \"Always cite the specific Section number and clause for full transparency.\"\n    }\n  ]\n}\n\nDocument Content Samples (use these to create GROUNDED questions):\nOCEANWAVE MARITIME SERVICES — EMPLOYEE HANDBOOK SUPPLEMENT\n===========================================================\n\nEffective Date: March 2024\nDepartment: Human Resources\n\nSECTION A: WORK SCHEDULES & ATTENDANCE\n═══════════════════════════════════════\n\nA.1 Standard Work Hours\n- Shore staff: Monday to Friday, 9:00 AM to 6:00 PM (1 hour lunch break).\n- Warehouse staff: Rotating shifts — 6 AM to 2 PM, 2 PM to 10 PM, 10 PM to 6 AM.\n- Weekend work requires pre-approval and attracts 150% pay (time-and-a-half).\n- Flexible working hours available for Grade C and above with manager approval.\n\nA.2 Remote Work Policy\n- Eligible positions may work remotely up to 2 days per week.\n- Remote work requires a stable internet connection (minimum 25 Mbps).\n- Employees must be reachable during core hours (1\n\n---\n\nOCEANWAVE MARITIME SERVICES — HR POLICY MANUAL\n=================================================\n\nEffective Date: January 1, 2024\nVersion: 3.2\nApproved By: VP Human Resources\n\nTABLE OF CONTENTS\n1. Leave Policies\n2. Employee Benefits\n3. Code of Conduct\n4. Grievance Procedures\n5. Workplace Safety\n\n═══════════════════════════════════════════════════\nSECTION 1: LEAVE POLICIES\n═══════════════════════════════════════════════════\n\n1.1 Annual Leave (Vacation)\n- All full-time shore staff are entitled to 21 days of paid annual leave per year.\n- Leave accrues at 1.75 days per month of continuous service.\n- Annual leave must be approved by the department head at least 2 weeks in advance.\n- Unused leave up to 5 days may be carried forward to the next calendar year.\n- Leave exceeding 5 consecutive days \n\nGenerate EXACTLY 24 test cases as a JSON array. Each case must have:\n{\n    \"id\": \"case_XX\",\n    \"question\": \"the test question\",\n    \"case_type\": \"answerable|out_of_scope|edge_case|multi_document\",\n    \"expected_answer_facts\": [\"fact1\", \"fact2\"],  // key facts for answerable questions\n    \"source_document\": \"document_name.pdf\",  // which doc has the answer\n    \"should_refuse\": false  // true for out_of_scope questions\n}\n\nDISTRIBUTION REQUIREMENTS:\n- At least 10 answerable questions (with specific expected facts from the documents)\n- At least 4 out-of-scope questions the agent MUST refuse\n- At least 3 edge cases (ambiguous phrasing, partial matches, trick questions)\n- At least 3 multi-document questions (answers spanning 2+ documents)\n\nQUALITY RULES:\n1. Answerable questions MUST have verifiable facts from the actual document content\n2. Out-of-scope questions should be plausible but clearly outside the agent's domain\n3. Edge cases should test boundary conditions (e.g., asking about something adjacent to scope)\n4. Multi-document cases should require combining information from different sources\n5. Expected facts must be SPECIFIC and VERIFIABLE, not vague\n\nReturn ONLY the JSON array, no markdown code fences or extra text.\n",
-  "generated_at": "2026-11-26T19:15:12.424796"
+  "generation_prompt": "You are ForgeAI's Evaluation Set Generator. Your job is to create a\ncomprehensive test set for evaluating an AI agent.\n\nAgent Requirements:\n{\n  \"scope\": \"I need an assistant that answers HR policy questions for OceanWave Maritime shore staff. It should help employees understand their leave entitlements (annual, sick, maternity/paternity), benefits (health insurance, retirement, education assistance), code of conduct rules, and the grievance process. The tone should be professional but approachable, and it must refuse to give legal advice or make policy exceptions.\",\n  \"audience\": \"OceanWave Maritime shore staff\",\n  \"tone\": \"Professional, approachable, and strictly document-grounded\",\n  \"must_answer_topics\": [\n    \"annual\",\n    \"sick\",\n    \"maternity/paternity\",\n    \"health insurance\",\n    \"retirement\",\n    \"education assistance\",\n    \"I need an assistant that answers HR policy questions for\",\n    \"It should help employees understand their leave entitlements (annual, sick,\",\n    \"Section A: Work Schedule...\",\n    \"Table Of Contents\"\n  ],\n  \"must_refuse_topics\": [\n    \"give legal advice or make policy exceptions\",\n    \"Formal legal advice is not supported and must be refused\"\n  ],\n  \"required_capabilities\": [\n    \"I need an assistant that answers HR policy questions for OceanWave Maritime shore staff\",\n    \"It should help employees understand their leave entitlements (annual, sick, maternity/paternity), benefits (health insurance, retirement, education assistance), code of conduct rules, and the grievance process\"\n  ],\n  \"document_coverage\": [\n    \"employee_handbook_supplement.txt: Preview: OCEANWAVE MARITIME SERVICES \\u2014 EMPLOYEE HANDBOOK SUPPLEMENT ===========================================================\",\n    \"hr_policy_manual.txt: Preview: OCEANWAVE MARITIME SERVICES \\u2014 HR POLICY MANUAL =================================================\"\n  ],\n  \"document_summary\": \"Knowledge base containing 2 file(s): employee_handbook_supplement.txt, hr_policy_manual.txt.\",\n  \"groundability_warnings\": [\n    \"Formal legal advice is not supported and must be refused\"\n  ],\n  \"unsupported_requirements\": [\n    \"Formal legal advice is not supported and must be refused\"\n  ],\n  \"tools_needed\": [\n    \"current_date\"\n  ],\n  \"clarifications\": [\n    {\n      \"question\": \"Who is the primary target audience for this assistant covering answers, policy, oceanwave, maritime?\",\n      \"answer\": \"Internal staff and stakeholders referenced in the brief (I need an assistant that answers HR policy questions for OceanWave Maritime shor).\"\n    },\n    {\n      \"question\": \"What tone and level of detail should responses follow when citing employee_handbook_supplement.txt, hr_policy_manual.txt?\",\n      \"answer\": \"Professional, clear, concise, and strictly grounded in the documents.\"\n    },\n    {\n      \"question\": \"Are there specific edge cases or requests (such as approvals, exceptions, or external advice) that must be strictly refused?\",\n      \"answer\": \"Strictly refuse out-of-scope requests, unauthorized approvals, or topics not found in the documents.\"\n    },\n    {\n      \"question\": \"Should responses always include explicit source filenames and section/row citations?\",\n      \"answer\": \"Yes, always cite the exact source document filename and relevant section or row.\"\n    }\n  ]\n}\n\nDocument Content Samples (use these to create GROUNDED questions):\n[Source: employee_handbook_supplement.txt]\nOCEANWAVE MARITIME SERVICES — EMPLOYEE HANDBOOK SUPPLEMENT\n===========================================================\n\nEffective Date: March 2024\nDepartment: Human Resources\n\nSECTION A: WORK SCHEDULES & ATTENDANCE\n═══════════════════════════════════════\n\nA.1 Standard Work Hours\n- Shore staff: Monday to Friday, 9:00 AM to 6:00 PM (1 hour lunch break).\n- Warehouse staff: Rotating shifts — 6 AM to 2 PM, 2 PM to 10 PM, 10 PM to 6 AM.\n- Weekend work requires pre-approval and attracts 150% pay (time-and-a-half).\n- Flexible working hours available for Grade C and above with manager approval.\n\nA.2 Remote Work Policy\n- Eligible positions may work remotely up to 2 days per week.\n- Remote work requires a stable internet connection (minimum 25 Mbps).\n- Emplo\n\n---\n\n[Source: hr_policy_manual.txt]\nOCEANWAVE MARITIME SERVICES — HR POLICY MANUAL\n=================================================\n\nEffective Date: January 1, 2024\nVersion: 3.2\nApproved By: VP Human Resources\n\nTABLE OF CONTENTS\n1. Leave Policies\n2. Employee Benefits\n3. Code of Conduct\n4. Grievance Procedures\n5. Workplace Safety\n\n═══════════════════════════════════════════════════\nSECTION 1: LEAVE POLICIES\n═══════════════════════════════════════════════════\n\n1.1 Annual Leave (Vacation)\n- All full-time shore staff are entitled to 21 days of paid annual leave per year.\n- Leave accrues at 1.75 days per month of continuous service.\n- Annual leave must be approved by the department head at least 2 weeks in advance.\n- Unused leave up to 5 days may be carried forward to the next calendar year.\n- Leav\n\nGenerate EXACTLY 24 test cases as a JSON array. Each case must have:\n{\n    \"id\": \"case_XX\",\n    \"question\": \"the test question\",\n    \"case_type\": \"answerable|out_of_scope|edge_case|multi_document\",\n    \"expected_answer_facts\": [\"fact1\", \"fact2\"],  // key facts for answerable questions\n    \"source_document\": \"document_name.pdf\",  // which doc has the answer\n    \"should_refuse\": false  // true for out_of_scope questions\n}\n\nDISTRIBUTION REQUIREMENTS:\n- At least 10 answerable questions (with specific expected facts from the documents)\n- At least 4 out-of-scope questions the agent MUST refuse\n- At least 3 edge cases (ambiguous phrasing, partial matches, trick questions)\n- At least 3 multi-document questions (answers spanning 2+ documents)\n\nQUALITY RULES:\n1. Answerable questions MUST have verifiable facts from the actual document content\n2. Out-of-scope questions should be plausible but clearly outside the agent's domain\n3. Edge cases should test boundary conditions (e.g., asking about something adjacent to scope)\n4. Multi-document cases should require combining information from different sources\n5. Expected facts must be SPECIFIC and VERIFIABLE, not vague\n\nReturn ONLY the JSON array, no markdown code fences or extra text.\n",
+  "generated_at": "2026-11-26T22:47:49.748639"
 }

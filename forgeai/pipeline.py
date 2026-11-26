@@ -168,7 +168,16 @@ class ForgeAIPipeline:
         self.console.print("\n[bold yellow]━━━ Stage 4: Eval Set Generation ━━━[/bold yellow]")
 
         documents = load_documents(doc_folder)
-        doc_samples = [doc.page_content for doc in documents]
+        doc_filenames = sorted({doc.metadata.get("source", "unknown") for doc in documents})
+        for cand in tournament_candidates:
+            if not cand.document_list:
+                cand.document_list = doc_filenames
+        if not agent_definition.document_list:
+            agent_definition.document_list = doc_filenames
+        doc_samples = [
+            f"[Source: {doc.metadata.get('source', 'unknown')}]\n{doc.page_content}"
+            for doc in documents
+        ]
 
         eval_set = self.eval_generator.generate(
             requirements=requirements,
@@ -212,35 +221,21 @@ class ForgeAIPipeline:
         for iteration in range(self.config.budget.max_iterations + 1):
             self.console.print(f"\n[bold cyan]── Iteration {iteration} ──[/bold cyan]")
 
-            # Build agent runner for this iteration
-            chunks = chunk_documents(
-                documents,
-                chunk_size=current_definition.retrieval_config.chunk_size,
-                chunk_overlap=current_definition.retrieval_config.chunk_overlap
+            # Build agent runner ONCE for this iteration
+            runner = AgentRunner(
+                agent_definition=current_definition,
+                llm_config=self.config.llm,
+                embedding_config=self.config.embedding,
+                doc_folder=doc_folder,
+                tool_registry=self.tool_registry
             )
-            vector_store = create_vector_store(chunks, self.config.embedding)
 
             # Run all eval cases
             responses = []
             contexts = []
             for case in eval_set.cases:
                 try:
-                    # Retrieve context
-                    retrieved = vector_store.similarity_search(
-                        case.question,
-                        k=current_definition.retrieval_config.top_k
-                    )
-                    context_chunks = [doc.page_content for doc in retrieved]
-
-                    # Generate response using the agent
-                    runner = AgentRunner(
-                        agent_definition=current_definition,
-                        llm_config=self.config.llm,
-                        embedding_config=self.config.embedding,
-                        doc_folder=doc_folder,
-                        tool_registry=self.tool_registry
-                    )
-                    answer, _ = runner.query(case.question)
+                    answer, context_chunks = runner.query(case.question, return_context=True)
                     responses.append(answer)
                     contexts.append(context_chunks)
                 except Exception as e:
@@ -369,28 +364,19 @@ class ForgeAIPipeline:
 
             # Quick evaluation on a subset of cases
             subset = eval_set.cases[:8]  # Use first 8 cases for speed
-            chunks = chunk_documents(
-                documents,
-                chunk_size=candidate.retrieval_config.chunk_size,
-                chunk_overlap=candidate.retrieval_config.chunk_overlap
+            runner = AgentRunner(
+                agent_definition=candidate,
+                llm_config=self.config.llm,
+                embedding_config=self.config.embedding,
+                doc_folder=doc_folder,
+                tool_registry=self.tool_registry
             )
-            vector_store = create_vector_store(chunks, self.config.embedding)
 
             responses = []
             contexts = []
             for case in subset:
                 try:
-                    retrieved = vector_store.similarity_search(case.question, k=candidate.retrieval_config.top_k)
-                    context_chunks = [doc.page_content for doc in retrieved]
-
-                    runner = AgentRunner(
-                        agent_definition=candidate,
-                        llm_config=self.config.llm,
-                        embedding_config=self.config.embedding,
-                        doc_folder=doc_folder,
-                        tool_registry=self.tool_registry
-                    )
-                    answer, _ = runner.query(case.question)
+                    answer, context_chunks = runner.query(case.question, return_context=True)
                     responses.append(answer)
                     contexts.append(context_chunks)
                 except Exception:

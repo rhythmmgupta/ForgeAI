@@ -1,0 +1,136 @@
+You are ForgeAI's Evaluation Set Generator. Your job is to create a
+comprehensive test set for evaluating an AI agent.
+
+Agent Requirements:
+{
+  "scope": "I need an assistant that answers HR policy questions for OceanWave Maritime shore staff. It should help employees understand their leave entitlements (annual, sick, maternity/paternity), benefits (health insurance, retirement, education assistance), code of conduct rules, and the grievance process. The tone should be professional but approachable, and it must refuse to give legal advice or make policy exceptions.",
+  "audience": "OceanWave Maritime shore staff",
+  "tone": "Professional, approachable, and strictly document-grounded",
+  "must_answer_topics": [
+    "annual",
+    "sick",
+    "maternity/paternity",
+    "health insurance",
+    "retirement",
+    "education assistance",
+    "I need an assistant that answers HR policy questions for",
+    "It should help employees understand their leave entitlements (annual, sick,",
+    "Section A: Work Schedule...",
+    "Table Of Contents"
+  ],
+  "must_refuse_topics": [
+    "give legal advice or make policy exceptions",
+    "Formal legal advice is not supported and must be refused"
+  ],
+  "required_capabilities": [
+    "I need an assistant that answers HR policy questions for OceanWave Maritime shore staff",
+    "It should help employees understand their leave entitlements (annual, sick, maternity/paternity), benefits (health insurance, retirement, education assistance), code of conduct rules, and the grievance process"
+  ],
+  "document_coverage": [
+    "employee_handbook_supplement.txt: Preview: OCEANWAVE MARITIME SERVICES \u2014 EMPLOYEE HANDBOOK SUPPLEMENT ===========================================================",
+    "hr_policy_manual.txt: Preview: OCEANWAVE MARITIME SERVICES \u2014 HR POLICY MANUAL ================================================="
+  ],
+  "document_summary": "Knowledge base containing 2 file(s): employee_handbook_supplement.txt, hr_policy_manual.txt.",
+  "groundability_warnings": [
+    "Formal legal advice is not supported and must be refused"
+  ],
+  "unsupported_requirements": [
+    "Formal legal advice is not supported and must be refused"
+  ],
+  "tools_needed": [
+    "current_date"
+  ],
+  "clarifications": [
+    {
+      "question": "Who is the primary target audience for this assistant covering answers, policy, oceanwave, maritime?",
+      "answer": "Internal staff and stakeholders referenced in the brief (I need an assistant that answers HR policy questions for OceanWave Maritime shor)."
+    },
+    {
+      "question": "What tone and level of detail should responses follow when citing employee_handbook_supplement.txt, hr_policy_manual.txt?",
+      "answer": "Professional, clear, concise, and strictly grounded in the documents."
+    },
+    {
+      "question": "Are there specific edge cases or requests (such as approvals, exceptions, or external advice) that must be strictly refused?",
+      "answer": "Strictly refuse out-of-scope requests, unauthorized approvals, or topics not found in the documents."
+    },
+    {
+      "question": "Should responses always include explicit source filenames and section/row citations?",
+      "answer": "Yes, always cite the exact source document filename and relevant section or row."
+    }
+  ]
+}
+
+Document Content Samples (use these to create GROUNDED questions):
+[Source: employee_handbook_supplement.txt]
+OCEANWAVE MARITIME SERVICES — EMPLOYEE HANDBOOK SUPPLEMENT
+===========================================================
+
+Effective Date: March 2024
+Department: Human Resources
+
+SECTION A: WORK SCHEDULES & ATTENDANCE
+═══════════════════════════════════════
+
+A.1 Standard Work Hours
+- Shore staff: Monday to Friday, 9:00 AM to 6:00 PM (1 hour lunch break).
+- Warehouse staff: Rotating shifts — 6 AM to 2 PM, 2 PM to 10 PM, 10 PM to 6 AM.
+- Weekend work requires pre-approval and attracts 150% pay (time-and-a-half).
+- Flexible working hours available for Grade C and above with manager approval.
+
+A.2 Remote Work Policy
+- Eligible positions may work remotely up to 2 days per week.
+- Remote work requires a stable internet connection (minimum 25 Mbps).
+- Emplo
+
+---
+
+[Source: hr_policy_manual.txt]
+OCEANWAVE MARITIME SERVICES — HR POLICY MANUAL
+=================================================
+
+Effective Date: January 1, 2024
+Version: 3.2
+Approved By: VP Human Resources
+
+TABLE OF CONTENTS
+1. Leave Policies
+2. Employee Benefits
+3. Code of Conduct
+4. Grievance Procedures
+5. Workplace Safety
+
+═══════════════════════════════════════════════════
+SECTION 1: LEAVE POLICIES
+═══════════════════════════════════════════════════
+
+1.1 Annual Leave (Vacation)
+- All full-time shore staff are entitled to 21 days of paid annual leave per year.
+- Leave accrues at 1.75 days per month of continuous service.
+- Annual leave must be approved by the department head at least 2 weeks in advance.
+- Unused leave up to 5 days may be carried forward to the next calendar year.
+- Leav
+
+Generate EXACTLY 24 test cases as a JSON array. Each case must have:
+{
+    "id": "case_XX",
+    "question": "the test question",
+    "case_type": "answerable|out_of_scope|edge_case|multi_document",
+    "expected_answer_facts": ["fact1", "fact2"],  // key facts for answerable questions
+    "source_document": "document_name.pdf",  // which doc has the answer
+    "should_refuse": false  // true for out_of_scope questions
+}
+
+DISTRIBUTION REQUIREMENTS:
+- At least 10 answerable questions (with specific expected facts from the documents)
+- At least 4 out-of-scope questions the agent MUST refuse
+- At least 3 edge cases (ambiguous phrasing, partial matches, trick questions)
+- At least 3 multi-document questions (answers spanning 2+ documents)
+
+QUALITY RULES:
+1. Answerable questions MUST have verifiable facts from the actual document content
+2. Out-of-scope questions should be plausible but clearly outside the agent's domain
+3. Edge cases should test boundary conditions (e.g., asking about something adjacent to scope)
+4. Multi-document cases should require combining information from different sources
+5. Expected facts must be SPECIFIC and VERIFIABLE, not vague
+
+Return ONLY the JSON array, no markdown code fences or extra text.

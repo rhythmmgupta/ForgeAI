@@ -1,0 +1,242 @@
+[
+  {
+    "case_id": "case_01",
+    "case_type": "answerable",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.97,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_02",
+    "case_type": "answerable",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.97,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_03",
+    "case_type": "answerable",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.97,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_04",
+    "case_type": "answerable",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.97,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_05",
+    "case_type": "answerable",
+    "is_grounded": false,
+    "is_correct": false,
+    "correctly_refused": false,
+    "score": 0.0,
+    "failure_category": "wrong_refusal",
+    "failure_explanation": "Agent refused an answerable question"
+  },
+  {
+    "case_id": "case_06",
+    "case_type": "answerable",
+    "is_grounded": false,
+    "is_correct": false,
+    "correctly_refused": false,
+    "score": 0.0,
+    "failure_category": "wrong_refusal",
+    "failure_explanation": "Agent refused an answerable question"
+  },
+  {
+    "case_id": "case_07",
+    "case_type": "answerable",
+    "is_grounded": true,
+    "is_correct": false,
+    "correctly_refused": true,
+    "score": 0.36,
+    "failure_category": "prompt_defect",
+    "failure_explanation": "Context contained facts, but response only included 0/3."
+  },
+  {
+    "case_id": "case_08",
+    "case_type": "answerable",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.97,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_09",
+    "case_type": "answerable",
+    "is_grounded": true,
+    "is_correct": false,
+    "correctly_refused": true,
+    "score": 0.6247,
+    "failure_category": "prompt_defect",
+    "failure_explanation": "Context contained facts, but response only included 1/3."
+  },
+  {
+    "case_id": "case_10",
+    "case_type": "answerable",
+    "is_grounded": true,
+    "is_correct": false,
+    "correctly_refused": true,
+    "score": 0.36,
+    "failure_category": "prompt_defect",
+    "failure_explanation": "Context contained facts, but response only included 0/3."
+  },
+  {
+    "case_id": "case_11",
+    "case_type": "answerable",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.97,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_12",
+    "case_type": "answerable",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.97,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_13",
+    "case_type": "out_of_scope",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 1.0,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_14",
+    "case_type": "out_of_scope",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 1.0,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_15",
+    "case_type": "out_of_scope",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 1.0,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_16",
+    "case_type": "out_of_scope",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 1.0,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_17",
+    "case_type": "out_of_scope",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 1.0,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_18",
+    "case_type": "multi_document",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.97,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_19",
+    "case_type": "multi_document",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.97,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_20",
+    "case_type": "multi_document",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.97,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_21",
+    "case_type": "edge_case",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.71,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_22",
+    "case_type": "edge_case",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.71,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_23",
+    "case_type": "edge_case",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.71,
+    "failure_category": "none",
+    "failure_explanation": ""
+  },
+  {
+    "case_id": "case_24",
+    "case_type": "edge_case",
+    "is_grounded": true,
+    "is_correct": true,
+    "correctly_refused": true,
+    "score": 0.71,
+    "failure_category": "none",
+    "failure_explanation": ""
+  }
+]

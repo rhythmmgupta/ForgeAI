@@ -20,6 +20,7 @@ from forgeai.config import LLMConfig, get_llm
 from forgeai.models import (
     RequirementsDocument, AgentDefinition, RetrievalConfig, OutputContract
 )
+from forgeai.core.llm_utils import invoke_with_retry
 
 
 AGENT_GENERATOR_PROMPT = """You are ForgeAI's Agent Generator. Given a structured requirements
@@ -101,7 +102,7 @@ class AgentGenerator:
             HumanMessage(content=AGENT_GENERATOR_PROMPT.format(requirements=req_text))
         ]
 
-        response = self.llm.invoke(messages)
+        response = invoke_with_retry(self.llm, messages)
         content = response.content.strip()
 
         # Clean response
@@ -110,12 +111,25 @@ class AgentGenerator:
 
         try:
             data = json.loads(content)
-            # Validate tools against available tools
+            # Validate tools against available tools and requirements
             data["tools"] = [t for t in data.get("tools", []) if t in self.available_tools]
-            # Only keep tools the requirements say are needed
             needed = set(requirements.tools_needed)
             data["tools"] = [t for t in data["tools"] if t in needed]
             data["iteration"] = iteration
+
+            # Ensure declarative fields are populated
+            if not data.get("scope"):
+                data["scope"] = requirements.scope
+            if not data.get("refusal_rules"):
+                data["refusal_rules"] = list(requirements.must_refuse_topics)
+            if not data.get("document_list") and requirements.document_coverage:
+                data["document_list"] = [
+                    d.split(":")[0].strip() for d in requirements.document_coverage if ":" in d
+                ]
+            if not data.get("citation_behavior"):
+                data["citation_behavior"] = (
+                    "Always cite the source document filename and section/row when answering."
+                )
 
             # Parse nested objects
             if isinstance(data.get("retrieval_config"), dict):
@@ -124,7 +138,7 @@ class AgentGenerator:
                 data["output_contract"] = OutputContract(**data["output_contract"])
 
             return AgentDefinition(**data)
-        except Exception as e:
+        except Exception:
             # Fallback: create a basic definition
             return self._create_fallback_definition(requirements, iteration)
 
@@ -169,7 +183,7 @@ class AgentGenerator:
                     f"Return ONLY the new system prompt text, nothing else."
                 ))
             ]
-            response = self.llm.invoke(messages)
+            response = invoke_with_retry(self.llm, messages)
             variant_prompt = response.content.strip()
             if variant_prompt.startswith("```"):
                 variant_prompt = variant_prompt.split("\n", 1)[1].rsplit("```", 1)[0].strip()
@@ -218,7 +232,7 @@ class AgentGenerator:
             ))
         ]
 
-        response = self.llm.invoke(messages)
+        response = invoke_with_retry(self.llm, messages)
         content = response.content.strip()
         if content.startswith("```"):
             content = content.split("\n", 1)[1].rsplit("```", 1)[0].strip()
@@ -288,8 +302,13 @@ RULES:
 """
 
         return AgentDefinition(
-            name=f"{requirements.scope} Agent",
+            name=f"{requirements.scope[:40].strip()} Agent",
+            scope=requirements.scope,
             system_prompt=system_prompt,
+            refusal_rules=list(requirements.must_refuse_topics),
+            document_list=[
+                d.split(":")[0].strip() for d in requirements.document_coverage if ":" in d
+            ],
             retrieval_config=RetrievalConfig(),
             tools=[t for t in requirements.tools_needed if t in self.available_tools],
             output_contract=OutputContract(

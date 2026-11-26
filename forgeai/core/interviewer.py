@@ -19,6 +19,7 @@ except ImportError:
 from forgeai.config import LLMConfig, get_llm
 from forgeai.models import RequirementsDocument
 from forgeai.core.document_processor import load_documents, get_document_summary
+from forgeai.core.llm_utils import invoke_with_retry
 
 
 INTERVIEWER_SYSTEM_PROMPT = """You are ForgeAI's Intake Interviewer. Your job is to analyze a user's
@@ -69,8 +70,11 @@ Produce a JSON object with these exact fields:
     "tone": "communication style",
     "must_answer_topics": ["topic1", "topic2"],
     "must_refuse_topics": ["topic1", "topic2"],
+    "required_capabilities": ["capability1", "capability2"],
+    "document_coverage": ["filename: summary of covered topics"],
     "document_summary": "what the docs contain",
     "groundability_warnings": ["warning1 if any"],
+    "unsupported_requirements": ["unsupported capability or topic if any"],
     "tools_needed": ["tool_name1"],
     "clarifications": [{{"question": "q", "answer": "a"}}]
 }}
@@ -101,7 +105,7 @@ class IntakeInterviewer:
                 "Return ONLY the JSON array, no code fences."
             ))
         ]
-        response = self.llm.invoke(messages)
+        response = invoke_with_retry(self.llm, messages)
         try:
             # Try to parse as JSON
             content = response.content.strip()
@@ -164,7 +168,7 @@ class IntakeInterviewer:
             ))
         ]
 
-        response = self.llm.invoke(messages)
+        response = invoke_with_retry(self.llm, messages)
         content = response.content.strip()
 
         # Parse JSON response
@@ -174,20 +178,32 @@ class IntakeInterviewer:
         try:
             data = json.loads(content)
             data["clarifications"] = clarifications
-            return RequirementsDocument(**data)
-        except (json.JSONDecodeError, Exception) as e:
+            req = RequirementsDocument(**data)
+        except (json.JSONDecodeError, Exception):
             # Fallback: create a basic requirements doc
-            return RequirementsDocument(
+            req = RequirementsDocument(
                 scope=brief,
                 audience="General users",
                 tone="Professional and helpful",
                 must_answer_topics=["Topics covered in provided documents"],
                 must_refuse_topics=["Topics not in documents", "Personal opinions"],
+                required_capabilities=[brief],
+                document_coverage=[doc_summary[:200]],
                 document_summary=doc_summary,
                 groundability_warnings=[],
+                unsupported_requirements=[],
                 tools_needed=[],
                 clarifications=clarifications or []
             )
+
+        # Groundability Guard enforcement: ensure flagged unsupported items are in must_refuse_topics
+        for item in req.groundability_warnings + req.unsupported_requirements:
+            if item and item not in req.must_refuse_topics:
+                req.must_refuse_topics.append(item)
+        if not req.unsupported_requirements and req.groundability_warnings:
+            req.unsupported_requirements = list(req.groundability_warnings)
+        req.tools_needed = [t for t in req.tools_needed if t in self.available_tools]
+        return req
 
     def _auto_answer_questions(
         self, brief: str, doc_summary: str, questions: List[str]
@@ -208,7 +224,7 @@ class IntakeInterviewer:
                 "'question' and 'answer' keys. Return ONLY the JSON array."
             ))
         ]
-        response = self.llm.invoke(messages)
+        response = invoke_with_retry(self.llm, messages)
         content = response.content.strip()
         if content.startswith("```"):
             content = content.split("\n", 1)[1].rsplit("```", 1)[0].strip()

@@ -70,3 +70,60 @@ def test_baseline_and_regression_execution(tmp_path):
     )
     assert "factory_score" in comp_res
     assert (tmp_path / "comp" / "factory_vs_human_baseline.md").exists()
+
+
+def test_unseen_brief_and_documents(tmp_path):
+    """Prove ForgeAI works on a brand-new unseen brief and unseen document names."""
+    from forgeai.pipeline import ForgeAIPipeline
+    from forgeai.config import ForgeAIConfig, LLMConfig, BudgetConfig
+
+    docs_dir = tmp_path / "sec_docs"
+    docs_dir.mkdir()
+    (docs_dir / "incident_playbook.txt").write_text(
+        "SECTION 1: SEVERITY LEVELS\n"
+        "P1 Critical Incidents require acknowledgement within 15 minutes and escalation to CISO.\n"
+        "P2 High Incidents require acknowledgement within 60 minutes.\n"
+        "SECTION 2: PASSWORD ROTATION\n"
+        "Service account keys must be rotated every 90 days using Vault.\n"
+        "Phishing reports must be forwarded to security-ops@acme-corp.example within 1 hour.\n",
+        encoding="utf-8",
+    )
+    (docs_dir / "access_control_matrix.csv").write_text(
+        "role,system,access_level,approval_required\n"
+        "Intern,ProductionDB,None,VP Engineering\n"
+        "SRE,ProductionDB,ReadWrite,Security Lead\n"
+        "Analyst,AnalyticsWarehouse,ReadOnly,Manager\n",
+        encoding="utf-8",
+    )
+
+    brief = (
+        "I need an IT Security and Incident Response assistant for Acme engineering staff. "
+        "It should answer questions about incident severity SLAs, password rotation, and role-based access "
+        "from the access control matrix CSV. It must refuse to grant production access or provide legal advice."
+    )
+    out_dir = tmp_path / "unseen_out"
+
+    cfg = ForgeAIConfig(
+        llm=LLMConfig(provider="simulator"),
+        budget=BudgetConfig(max_iterations=1),
+        verbose=False,
+    )
+    pipeline = ForgeAIPipeline(cfg)
+    report = pipeline.run(
+        brief=brief,
+        doc_folder=str(docs_dir),
+        output_dir=str(out_dir),
+        auto_mode=True,
+        run_tournament=False,
+    )
+
+    assert len(report.eval_set.cases) >= 20
+    assert "weather_api" not in report.agent_definition.tools
+    assert "csv_lookup" in report.agent_definition.tools
+    assert "incident_playbook.txt" in report.agent_definition.document_list
+    assert "access_control_matrix.csv" in report.agent_definition.document_list
+    assert (out_dir / "quality_report.md").exists()
+    assert (out_dir / "judge_results.json").exists()
+    assert (out_dir / "raw_responses.json").exists()
+    assert (out_dir / "system_prompt.txt").exists()
+    assert (out_dir / "eval_generation_prompt.txt").exists()

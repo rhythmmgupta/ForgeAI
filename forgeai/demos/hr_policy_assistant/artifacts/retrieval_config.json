@@ -1,0 +1,6 @@
+{
+  "chunk_size": 350,
+  "chunk_overlap": 100,
+  "top_k": 10,
+  "score_threshold": 0.15
+}

@@ -18,10 +18,22 @@ class RequirementsDocument(BaseModel):
     tone: str = Field(description="Communication style (formal, friendly, technical, etc.)")
     must_answer_topics: List[str] = Field(description="Topics the agent MUST be able to answer")
     must_refuse_topics: List[str] = Field(description="Topics the agent MUST refuse to answer")
+    required_capabilities: List[str] = Field(
+        default_factory=list,
+        description="Specific capabilities requested by the user"
+    )
+    document_coverage: List[str] = Field(
+        default_factory=list,
+        description="Per-document coverage summary"
+    )
     document_summary: str = Field(description="Summary of what the uploaded documents contain")
     groundability_warnings: List[str] = Field(
         default_factory=list,
         description="Warnings about brief requests not supported by documents"
+    )
+    unsupported_requirements: List[str] = Field(
+        default_factory=list,
+        description="Unknown or unsupported requirements flagged before agent generation"
     )
     tools_needed: List[str] = Field(
         default_factory=list,
@@ -57,10 +69,23 @@ class OutputContract(BaseModel):
 class AgentDefinition(BaseModel):
     """Complete declarative agent definition produced by the Agent Generator."""
     name: str = Field(description="Agent name")
+    scope: str = Field(default="", description="Explicit scope of the agent")
     system_prompt: str = Field(description="The full system prompt for the agent")
+    refusal_rules: List[str] = Field(
+        default_factory=list,
+        description="Explicit refusal rules for out-of-scope or unsupported topics"
+    )
+    document_list: List[str] = Field(
+        default_factory=list,
+        description="List of source documents in the knowledge base"
+    )
     retrieval_config: RetrievalConfig = Field(default_factory=RetrievalConfig)
     tools: List[str] = Field(default_factory=list, description="Tool names from registry")
     output_contract: OutputContract = Field(default_factory=OutputContract)
+    citation_behavior: str = Field(
+        default="Always cite the source document filename and section when answering from context.",
+        description="Source and citation behavior"
+    )
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
     iteration: int = Field(default=0, description="Which optimization iteration produced this")
 
@@ -79,17 +104,29 @@ class EvalCase(BaseModel):
     id: str = Field(description="Unique case identifier")
     question: str = Field(description="The test question")
     case_type: EvalCaseType = Field(description="Type of test case")
+    expected_behavior: str = Field(
+        default="answer",
+        description="Expected behavior: answer or refuse"
+    )
     expected_answer_facts: List[str] = Field(
         default_factory=list,
         description="Key facts that must appear in the answer (for answerable questions)"
     )
     source_document: Optional[str] = Field(
         default=None,
-        description="Which document(s) contain the answer"
+        description="Primary source document containing the answer"
+    )
+    expected_sources: List[str] = Field(
+        default_factory=list,
+        description="All expected source documents for this case"
     )
     should_refuse: bool = Field(
         default=False,
         description="Whether the agent should refuse this question"
+    )
+    grading_notes: str = Field(
+        default="",
+        description="Notes for grading this evaluation case"
     )
 
 
@@ -134,6 +171,7 @@ class IterationScorecard(BaseModel):
     passed: int
     failed: int
     score: float = Field(ge=0.0, le=1.0)
+    category_scores: Dict[str, float] = Field(default_factory=dict)
     case_scores: List[CaseScore] = Field(default_factory=list)
     failure_breakdown: Dict[str, int] = Field(default_factory=dict)
     changes_made: List[str] = Field(default_factory=list)
@@ -144,7 +182,10 @@ class OptimizationLog(BaseModel):
     """Log entry for what changed between iterations."""
     iteration: int
     change_type: str  # "prompt_edit", "retrieval_param", "tool_change"
+    failure_category: str = "prompt_defect"
+    diagnosis: str = ""
     description: str
+    reason: str = ""
     failures_addressed: List[str]  # Case IDs
     score_before: float
     score_after: float

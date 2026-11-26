@@ -1,0 +1,6 @@
+{
+  "format": "markdown",
+  "max_length": 450,
+  "must_cite_sources": true,
+  "refusal_template": "I am the Procurement Oceanwave Maritime S Assistant. I cannot fulfill this request because it falls outside my supported scope or is not covered in my source documents."
+}

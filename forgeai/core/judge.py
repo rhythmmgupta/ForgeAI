@@ -19,6 +19,7 @@ from forgeai.config import LLMConfig, get_llm
 from forgeai.models import (
     EvalCase, EvalCaseType, CaseScore, FailureCategory, IterationScorecard
 )
+from forgeai.core.llm_utils import invoke_with_retry
 
 
 JUDGE_PROMPT = """You are ForgeAI's impartial Judge. Score this agent response against the test case.
@@ -122,12 +123,22 @@ class Judge:
                 cat = s.failure_category.value
                 failure_breakdown[cat] = failure_breakdown.get(cat, 0) + 1
 
+        # Score per category
+        cat_groups: dict = {}
+        for s in case_scores:
+            cat_groups.setdefault(s.case_type.value, []).append(s.score)
+        category_scores = {
+            cat: round(sum(vals) / len(vals), 4)
+            for cat, vals in cat_groups.items() if vals
+        }
+
         return IterationScorecard(
             iteration=iteration,
             total_cases=total,
             passed=passed,
             failed=failed,
             score=round(avg_score, 4),
+            category_scores=category_scores,
             case_scores=case_scores,
             failure_breakdown=failure_breakdown,
         )
@@ -180,8 +191,11 @@ class Judge:
                     retrieved_chunks=retrieved_chunks
                 )
 
-        # For answerable questions
-        if case.case_type == EvalCaseType.ANSWERABLE and not case.should_refuse:
+        # For answerable, multi-document, or fact-bearing edge cases
+        if not case.should_refuse and (
+            case.case_type in (EvalCaseType.ANSWERABLE, EvalCaseType.MULTI_DOCUMENT)
+            or case.expected_answer_facts
+        ):
             if is_refusal:
                 return CaseScore(
                     case_id=case.id,
@@ -201,7 +215,6 @@ class Judge:
             facts_found = 0
             for fact in case.expected_answer_facts:
                 fact_words = set(fact.lower().split())
-                # Fuzzy match: at least 60% of fact words should appear
                 words_in_response = sum(1 for w in fact_words if w in response_lower)
                 if words_in_response >= max(1, len(fact_words) * 0.6):
                     facts_found += 1
@@ -209,10 +222,17 @@ class Judge:
             if case.expected_answer_facts:
                 fact_ratio = facts_found / len(case.expected_answer_facts)
             else:
-                fact_ratio = 0.5  # No expected facts to check
+                fact_ratio = 0.7 if len(response.strip()) > 20 else 0.3
 
-            # Check groundedness
+            # Check groundedness and citation compliance
             is_grounded = len(retrieved_chunks) > 0 and len(response.strip()) > 10
+            has_citation = (
+                "source" in response_lower
+                or any(src.lower() in response_lower for src in (case.expected_sources or []) if src)
+                or (case.source_document and case.source_document.lower() in response_lower)
+            )
+            grounding_bonus = 0.25 if is_grounded else 0.0
+            citation_bonus = 0.05 if has_citation else 0.0
 
             return CaseScore(
                 case_id=case.id,
@@ -222,15 +242,15 @@ class Judge:
                 is_grounded=is_grounded,
                 is_correct=fact_ratio >= 0.7,
                 correctly_refused=True,
-                score=round(fact_ratio * 0.7 + (0.3 if is_grounded else 0.0), 4),
+                score=round(min(1.0, fact_ratio * 0.7 + grounding_bonus + citation_bonus), 4),
                 failure_category=(
-                    FailureCategory.INCOMPLETE if fact_ratio < 1.0 and fact_ratio > 0
-                    else FailureCategory.RETRIEVAL_MISS if fact_ratio == 0
+                    FailureCategory.INCOMPLETE if 0 < fact_ratio < 1.0
+                    else FailureCategory.RETRIEVAL_MISS if fact_ratio == 0 and case.expected_answer_facts
                     else FailureCategory.NONE
                 ),
                 failure_explanation=(
                     f"Found {facts_found}/{len(case.expected_answer_facts)} expected facts"
-                    if fact_ratio < 1.0 else ""
+                    if case.expected_answer_facts and fact_ratio < 1.0 else ""
                 ),
                 retrieved_chunks=retrieved_chunks
             )
@@ -272,7 +292,7 @@ class Judge:
                 ))
             ]
 
-            result = self.llm.invoke(messages)
+            result = invoke_with_retry(self.llm, messages)
             content = result.content.strip()
             if content.startswith("```"):
                 content = content.split("\n", 1)[1].rsplit("```", 1)[0].strip()

@@ -1,24 +1,36 @@
 """
 ForgeAI Offline / Resilient Simulation LLM Provider
 ====================================================
-Provides an intelligent deterministic fallback LLM that simulates realistic
-pipeline outputs when live API keys are unavailable, rate-limited, or offline.
-Ensures ForgeAI runs unattended without crashing under any environment.
+Provides a 100% generic, content-driven fallback LLM that parses the actual
+brief, document summaries, document samples, requirements, and context from
+prompts when live API keys are unavailable or offline.
+
+No demo-specific rules, fixed document names, or hard-coded questions exist here.
 """
 
 import json
 import re
-from typing import List, Any, Optional
-from langchain_core.messages import BaseMessage, AIMessage
+from typing import List, Any, Optional, Dict, Tuple
+from langchain_core.messages import BaseMessage, AIMessage, SystemMessage
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.outputs import ChatResult, ChatGeneration
 
 
+_STOPWORDS = {
+    "the", "and", "for", "that", "this", "with", "from", "are", "was", "were",
+    "will", "would", "should", "could", "have", "has", "had", "into", "about",
+    "your", "our", "their", "they", "them", "what", "which", "when", "where",
+    "who", "how", "can", "may", "not", "but", "all", "any", "only", "must",
+    "need", "assistant", "agent", "help", "users", "questions", "answer",
+    "based", "documents", "information", "provided", "using", "also", "such",
+}
+
+
 class OfflineSimulationChatModel(BaseChatModel):
     """
-    A deterministic, intelligent simulation chat model for ForgeAI.
-    Recognizes prompt templates from the ForgeAI pipeline and generates
-    high-fidelity responses that satisfy all validation schemas.
+    A generic, deterministic simulation chat model for ForgeAI.
+    Dynamically inspects prompt inputs (brief, documents, requirements, context)
+    to produce schema-compliant, document-grounded outputs for ANY domain.
     """
     model_name: str = "forgeai-offline-simulator"
     temperature: float = 0.0
@@ -34,350 +46,787 @@ class OfflineSimulationChatModel(BaseChatModel):
         run_manager: Optional[Any] = None,
         **kwargs: Any
     ) -> ChatResult:
+        system_text = "\n".join(
+            m.content for m in messages if isinstance(m, SystemMessage) and isinstance(m.content, str)
+        )
         full_prompt = "\n".join(m.content for m in messages if isinstance(m.content, str))
-        response_text = self._route_and_generate(full_prompt)
+        response_text = self._route_and_generate(full_prompt, system_text)
         generation = ChatGeneration(message=AIMessage(content=response_text))
         return ChatResult(generations=[generation])
 
-    def _detect_domain(self, prompt_lower: str) -> str:
-        """Accurately identify whether prompt is for HR policy or Ship Spares."""
-        # 1. Check explicit brief markers
-        if "brief:" in prompt_lower:
-            brief_chunk = prompt_lower.split("brief:")[1][:400]
-            if any(k in brief_chunk for k in ["hr policy", "shore staff", "leave", "maternity", "grievance"]):
-                return "hr"
-            if any(k in brief_chunk for k in ["procurement", "spares", "catalogue", "marine parts"]):
-                return "procurement"
+    # ─── Helpers for Dynamic Prompt Parsing ──────────────────────────────────
 
-        # 2. Check requirements context
-        if "requirements:" in prompt_lower:
-            req_chunk = prompt_lower.split("requirements:")[1][:400]
-            if any(k in req_chunk for k in ["hr policy", "shore staff", "leave", "grievance", "benefits"]):
-                return "hr"
-            if any(k in req_chunk for k in ["procurement", "ship spares", "catalogue", "supplier"]):
-                return "procurement"
+    @staticmethod
+    def _extract_section(text: str, start_marker: str, end_markers: List[str]) -> str:
+        """Extract text between start_marker and the earliest end_marker."""
+        idx = text.find(start_marker)
+        if idx == -1:
+            return ""
+        sub = text[idx + len(start_marker):]
+        end_idx = len(sub)
+        for em in end_markers:
+            pos = sub.find(em)
+            if pos != -1 and pos < end_idx:
+                end_idx = pos
+        return sub[:end_idx].strip()
 
-        # 3. Check document samples or summaries
-        if any(k in prompt_lower for k in ["hr_policy_manual", "employee_handbook", "shore staff", "leave entitlements"]):
-            return "hr"
-        if any(k in prompt_lower for k in ["ship_spares", "catalogue.csv", "mrn-", "kleanfilter", "thordon"]):
-            return "procurement"
+    @staticmethod
+    def _extract_keywords(text: str, limit: int = 12) -> List[str]:
+        words = re.findall(r"[a-zA-Z][a-zA-Z0-9_-]{2,}", text.lower())
+        seen = []
+        for w in words:
+            if w not in _STOPWORDS and w not in seen:
+                seen.append(w)
+            if len(seen) >= limit:
+                break
+        return seen
 
-        # 4. Fallback based on keywords
-        if "hr" in prompt_lower or "leave" in prompt_lower or "maternity" in prompt_lower:
-            return "hr"
-        return "procurement"
+    @staticmethod
+    def _parse_doc_summary_files(doc_summary: str) -> List[Tuple[str, str]]:
+        """Parse '- **filename** [type]:' or '=== filename ===' blocks from get_document_summary output."""
+        files = []
+        # Pattern 1: - **filename** [type]...
+        md_blocks = re.split(r"-\s+\*\*(.+?)\*\*\s*\[[^\]]*\][^:]*:", doc_summary)
+        if len(md_blocks) >= 3:
+            for i in range(1, len(md_blocks) - 1, 2):
+                fname = md_blocks[i].strip()
+                body = md_blocks[i + 1].strip()
+                files.append((fname, body))
+            return files
 
-    def _route_and_generate(self, prompt: str) -> str:
+        # Pattern 2: === filename ===
+        blocks = re.split(r"===\s*(.+?)\s*===", doc_summary)
+        if len(blocks) >= 3:
+            for i in range(1, len(blocks) - 1, 2):
+                fname = blocks[i].strip()
+                body = blocks[i + 1].strip()
+                files.append((fname, body))
+        return files
+
+    @staticmethod
+    def _parse_doc_samples(samples_text: str) -> List[Tuple[str, str]]:
+        """Parse '[Source: filename]' blocks from EvalGenerator."""
+        blocks = re.split(r"\[Source:\s*(.+?)\]", samples_text)
+        docs = []
+        if len(blocks) >= 3:
+            for i in range(1, len(blocks) - 1, 2):
+                fname = blocks[i].strip()
+                body = blocks[i + 1].strip()
+                docs.append((fname, body))
+        elif samples_text.strip():
+            for idx, chunk in enumerate(samples_text.split("\n\n---\n\n"), 1):
+                if chunk.strip():
+                    docs.append((f"document_{idx}", chunk.strip()))
+        return docs
+
+    @staticmethod
+    def _select_tools_from_text(brief: str, doc_summary: str, available_tools: List[str]) -> List[str]:
+        """Restrained tool selection driven strictly by brief and document types."""
+        brief_l = brief.lower()
+        doc_l = doc_summary.lower()
+        selected = []
+
+        if "csv_lookup" in available_tools:
+            if ".csv" in doc_l or any(k in brief_l for k in [
+                "csv", "catalogue", "catalog", "inventory", "table", "part number",
+                "sku", "product list", "price list", "directory", "spreadsheet"
+            ]):
+                selected.append("csv_lookup")
+
+        if "calculator" in available_tools:
+            if any(k in brief_l for k in [
+                "calculat", "compute", "arithmetic", "total cost", "budget",
+                "conversion", "currency", "discount", "quote", "pricing", "math"
+            ]):
+                selected.append("calculator")
+
+        if "weather_api" in available_tools:
+            if any(k in brief_l for k in [
+                "weather", "forecast", "temperature", "wind speed", "meteorolog", "climate"
+            ]):
+                selected.append("weather_api")
+
+        if "current_date" in available_tools:
+            if any(k in brief_l for k in [
+                "date", "today", "deadline", "schedule", "validity", "expir",
+                "timeline", "leave", "calendar", "sla", "lead time"
+            ]):
+                selected.append("current_date")
+
+        return selected
+
+    @staticmethod
+    def _infer_brief_topics(brief: str) -> Tuple[List[str], List[str], List[str]]:
+        """Extract answer topics, refusal topics, and capabilities from a brief."""
+        brief_clean = brief.strip()
+        # Split sentences
+        sentences = [s.strip() for s in re.split(r"[.!?]+", brief_clean) if s.strip()]
+        must_answer = []
+        must_refuse = []
+        capabilities = []
+
+        for sent in sentences:
+            s_lower = sent.lower()
+            if any(marker in s_lower for marker in ["refuse", "must not", "never ", "do not ", "don't ", "prohibit"]):
+                # Extract refusal clause
+                for marker in ["refuse to ", "refuse ", "must not ", "never ", "do not "]:
+                    if marker in s_lower:
+                        idx = s_lower.find(marker)
+                        clause = sent[idx + len(marker):].strip(" ,.")
+                        if clause:
+                            must_refuse.append(clause)
+                        break
+            else:
+                capabilities.append(sent)
+
+        # Extract parenthetical or comma-separated topics from brief
+        parens = re.findall(r"\(([^)]+)\)", brief_clean)
+        for p in parens:
+            for item in p.split(","):
+                item_s = item.strip()
+                if item_s and len(item_s) > 2:
+                    must_answer.append(item_s)
+
+        # Also add concise phrases from sentences
+        for cap in capabilities[:4]:
+            words = cap.split()
+            if len(words) > 3:
+                must_answer.append(" ".join(words[:10]))
+
+        if not must_answer:
+            must_answer = ["Questions covered directly by the supplied knowledge base documents"]
+        if not must_refuse:
+            must_refuse = [
+                "Topics outside the supplied documents",
+                "Making unauthorized approvals, exceptions, or legal commitments",
+            ]
+
+        return must_answer[:8], must_refuse[:6], capabilities[:5]
+
+    @staticmethod
+    def _infer_name_from_scope(scope: str) -> str:
+        """Create a clean, generic agent name from its scope."""
+        words = re.findall(r"[A-Za-z0-9-]+", scope)
+        filtered = [w for w in words if w.lower() not in {
+            "i", "need", "an", "a", "the", "assistant", "that", "answers", "helps",
+            "with", "for", "to", "agent", "should", "must", "assist", "provide"
+        }]
+        title_words = [w.capitalize() for w in filtered[:4]]
+        if not title_words:
+            return "Domain Knowledge Assistant"
+        return f"{' '.join(title_words)} Assistant"
+
+    # ─── Router ──────────────────────────────────────────────────────────────
+
+    def _route_and_generate(self, prompt: str, system_text: str) -> str:
         prompt_lower = prompt.lower()
-        domain = self._detect_domain(prompt_lower)
 
         # 1. Intake Interviewer: Clarifying Questions
-        if "generate at most 5 clarifying questions" in prompt_lower or "clarifying questions as a json list" in prompt_lower:
-            if domain == "procurement":
-                return json.dumps([
-                    "Should the assistant have read-only access to part prices and stock quantities?",
-                    "Are emergency orders subject to different authorization thresholds?",
-                    "Should the assistant refuse to execute purchase approvals or contract commitments?",
-                    "Should currency conversion calculations be handled via an explicit calculator tool?"
-                ])
-            else:
-                return json.dumps([
-                    "What specific employee categories (shore staff, contractors) should this HR assistant cover?",
-                    "Should the assistant explicitly refuse to provide legal advice or make policy exceptions?",
-                    "Are there strict escalation procedures for formal employee grievances?",
-                    "How detailed should the citation of specific policy clauses and revision numbers be?"
-                ])
+        if "generate at most 5 clarifying questions" in prompt_lower:
+            brief = self._extract_section(prompt, "Brief:", ["Document Summary:", "Available Tools:"])
+            doc_summary = self._extract_section(prompt, "Document Summary:", ["Available Tools:", "Generate at most"])
+            files = self._parse_doc_summary_files(doc_summary)
+            file_names = ", ".join(f[0] for f in files[:3]) if files else "the supplied documents"
+            kws = self._extract_keywords(brief, limit=4)
+            topic_str = ", ".join(kws) if kws else "the requested domain"
+            return json.dumps([
+                f"Who is the primary target audience for this assistant covering {topic_str}?",
+                f"What tone and level of detail should responses follow when citing {file_names}?",
+                "Are there specific edge cases or requests (such as approvals, exceptions, or external advice) that must be strictly refused?",
+                "Should responses always include explicit source filenames and section/row citations?"
+            ])
 
         # 2. Auto-answer clarifying questions
         if "simulating a requester who wrote this brief" in prompt_lower:
-            if domain == "procurement":
-                return json.dumps([
-                    {"question": "Should the assistant have read-only access to part prices and stock quantities?", "answer": "Yes, strictly read-only lookup from the CSV catalogue."},
-                    {"question": "Are emergency orders subject to different authorization thresholds?", "answer": "Yes, emergency orders up to USD 25,000 can bypass standard requisition approvals as per Chapter 2."},
-                    {"question": "Should the assistant refuse to execute purchase approvals or contract commitments?", "answer": "Absolutely. It must refuse to approve POs or bind the company to financial commitments."},
-                    {"question": "Should currency conversion calculations be handled via an explicit calculator tool?", "answer": "Yes, use the calculator tool for any order totals or unit math."}
-                ])
-            else:
-                return json.dumps([
-                    {"question": "What specific employee categories should this HR assistant cover?", "answer": "OceanWave Maritime shore-based staff and warehouse personnel."},
-                    {"question": "Should the assistant explicitly refuse to provide legal advice or make policy exceptions?", "answer": "Yes, policy exceptions must always be directed to the VP of HR or Grievance Committee."},
-                    {"question": "Are there strict escalation procedures for formal employee grievances?", "answer": "Yes, follow the 5-step formal grievance timeline specified in the manual."},
-                    {"question": "How detailed should the citation of specific policy clauses be?", "answer": "Always cite the specific Section number and clause for full transparency."}
-                ])
+            brief = self._extract_section(prompt, "Brief:", ["Available Documents:", "Questions:"])
+            q_block = self._extract_section(prompt, "Questions:", ["Answer each question"])
+            questions = [
+                re.sub(r"^\d+\.\s*", "", line).strip()
+                for line in q_block.splitlines() if line.strip()
+            ]
+            answers = []
+            for q in questions[:5]:
+                ql = q.lower()
+                if "audience" in ql:
+                    ans = f"Internal staff and stakeholders referenced in the brief ({brief[:80]})."
+                elif "tone" in ql:
+                    ans = "Professional, clear, concise, and strictly grounded in the documents."
+                elif "refus" in ql or "edge" in ql:
+                    ans = "Strictly refuse out-of-scope requests, unauthorized approvals, or topics not found in the documents."
+                elif "cit" in ql or "source" in ql:
+                    ans = "Yes, always cite the exact source document filename and relevant section or row."
+                else:
+                    ans = "Follow the brief scope strictly and rely only on the supplied documents."
+                answers.append({"question": q, "answer": ans})
+            return json.dumps(answers)
 
         # 3. Requirements Generation (Intake Interviewer & Groundability Guard)
         if "produce a structured requirements document as json" in prompt_lower:
-            if domain == "procurement":
-                return json.dumps({
-                    "scope": "Assist OceanWave procurement personnel with ship spare parts catalogue lookup, supplier directory queries, and ordering guideline procedures.",
-                    "audience": "Vessel managers, technical superintendents, and procurement officers.",
-                    "tone": "Precise, professional, and compliance-oriented.",
-                    "must_answer_topics": [
-                        "Part numbers, unit prices, minimum orders, and stock levels from the catalogue",
-                        "Procurement authorization thresholds and approval limits",
-                        "Standard, emergency, and blanket order procedures",
-                        "Approved supplier directory contacts, ratings, and lead times",
-                        "Classification society certifications (SOLAS, MARPOL, ABS, DNV GL)"
-                    ],
-                    "must_refuse_topics": [
-                        "Approving purchase orders or signing contracts",
-                        "Making vendor commitments or negotiating terms",
-                        "Authorizing emergency expenditure above thresholds",
-                        "Speculating on unlisted parts or supplier pricing"
-                    ],
-                    "document_summary": "Ship spares CSV catalogue (30 marine items), procurement guidelines (authority, workflows, audits), and approved supplier directory.",
-                    "groundability_warnings": [
-                        "Real-time live freight tracking is not supported by static documents.",
-                        "Direct ERP transactional order placement is outside document knowledge."
-                    ],
-                    "tools_needed": ["csv_lookup", "calculator"],
-                    "clarifications": []
-                })
-            else:
-                return json.dumps({
-                    "scope": "Provide accurate guidance on OceanWave Maritime HR policies, leave entitlements, benefits, code of conduct, and grievance escalation for shore staff.",
-                    "audience": "Full-time shore-based employees, warehouse shift workers, and people managers.",
-                    "tone": "Empathetic, clear, objective, and strictly policy-grounded.",
-                    "must_answer_topics": [
-                        "Annual leave, sick leave, maternity (26 weeks) and paternity entitlements",
-                        "Health insurance coverage limits and dependent eligibility",
-                        "Code of conduct standards, anti-harassment policy, and confidentiality NDAs",
-                        "Step-by-step grievance procedure timelines and whistleblower protection",
-                        "Work hours, remote work policy, and performance review cycles"
-                    ],
-                    "must_refuse_topics": [
-                        "Granting individual policy exceptions or discretionary leave approvals",
-                        "Providing formal legal advice or labor law dispute counsel",
-                        "Offering psychological counseling or psychiatric diagnoses (must refer to EAP)",
-                        "Personal opinions regarding workplace conflict"
-                    ],
-                    "document_summary": "HR Policy Manual v3.2 covering leave, benefits, conduct, grievances, and workplace safety; Employee Handbook Supplement covering schedules and compensation.",
-                    "groundability_warnings": [
-                        "Seafarer offshore crew maritime labor convention (MLC) contracts are not included in shore staff policy.",
-                        "Executive compensation packages and stock options are not covered in the provided manuals."
-                    ],
-                    "tools_needed": ["current_date"],
-                    "clarifications": []
-                })
+            brief = self._extract_section(prompt, "Brief:", ["Document Summary:", "User Clarifications:"])
+            doc_summary = self._extract_section(prompt, "Document Summary:", ["User Clarifications:", "GROUNDABILITY CHECK:"])
+            clar_raw = self._extract_section(prompt, "User Clarifications:", ["GROUNDABILITY CHECK:", "Available tools"])
+            tools_raw = self._extract_section(prompt, "Available tools in the registry:", ["Only select tools", "Produce a JSON"])
+            available_tools = [t.strip() for t in tools_raw.split(",") if t.strip()] or [
+                "csv_lookup", "calculator", "weather_api", "current_date"
+            ]
 
-        # 4. Prompt Tournament Variant Generation
-        if "variant of the system prompt for the same agent" in prompt_lower:
-            approach = "structured"
+            files = self._parse_doc_summary_files(doc_summary)
+            doc_coverage = []
+            for fname, body in files:
+                first_lines = " ".join(line.strip() for line in body.splitlines()[:3] if line.strip())
+                doc_coverage.append(f"{fname}: {first_lines[:160]}")
+
+            must_answer, must_refuse, capabilities = self._infer_brief_topics(brief)
+            # Enrich must_answer from document headings/topics
+            for fname, body in files:
+                for line in body.splitlines():
+                    ls = line.strip()
+                    if 6 < len(ls) < 70 and (ls.isupper() or ls.endswith(":") or ls.startswith("#") or "SECTION" in ls.upper()):
+                        cleaned = ls.strip("#: ").title()
+                        if cleaned not in must_answer:
+                            must_answer.append(cleaned)
+                        if len(must_answer) >= 10:
+                            break
+
+            # Groundability check: compare brief words against doc_summary
+            doc_text_lower = doc_summary.lower()
+            warnings = []
+            unsupported = []
+            # Check for explicit capabilities/requests in brief not supported in docs
+            check_phrases = [
+                ("live ", "Live real-time external data is not available in static documents"),
+                ("real-time", "Real-time system integration is not supported by static documents"),
+                ("weather", "Live weather forecasting is not contained in the static document folder"),
+                ("stock price", "Live stock/market pricing is not in the supplied documents"),
+                ("approve", "Automated transaction or policy approvals are outside read-only document Q&A"),
+                ("legal advice", "Formal legal advice is not supported and must be refused"),
+                ("payroll", "Individual payroll records are not present in the supplied documents"),
+                ("medical", "Medical diagnosis or clinical advice is not supported"),
+            ]
+            brief_lower = brief.lower()
+            for trigger, msg in check_phrases:
+                if trigger in brief_lower and trigger.strip() not in doc_text_lower:
+                    warnings.append(msg)
+                    unsupported.append(msg)
+
+            tools_needed = self._select_tools_from_text(brief, doc_summary, available_tools)
+
+            # Detect tone & audience from brief
+            tone = "Professional, clear, and strictly document-grounded"
+            if "friendly" in brief_lower or "approachable" in brief_lower:
+                tone = "Professional, approachable, and strictly document-grounded"
+            elif "technical" in brief_lower or "precise" in brief_lower:
+                tone = "Precise, technical, and compliance-oriented"
+
+            audience = "Users and stakeholders defined in the agent brief"
+            aud_match = re.search(r"for\s+([A-Za-z0-9 ,&-]{4,60}?)(?:\.|,| who | that |$)", brief, re.IGNORECASE)
+            if aud_match:
+                audience = aud_match.group(1).strip()
+
+            return json.dumps({
+                "scope": brief.strip(),
+                "audience": audience,
+                "tone": tone,
+                "must_answer_topics": must_answer,
+                "must_refuse_topics": must_refuse,
+                "required_capabilities": capabilities,
+                "document_coverage": doc_coverage,
+                "document_summary": f"Knowledge base containing {len(files)} file(s): {', '.join(f[0] for f in files)}.",
+                "groundability_warnings": warnings,
+                "unsupported_requirements": unsupported,
+                "tools_needed": tools_needed,
+                "clarifications": []
+            })
+
+        # 4. Prompt Variant (Tournament)
+        if "generate a different variant of the system prompt" in prompt_lower:
+            base_prompt = self._extract_section(prompt, "Here is the base system prompt for an agent:", ["Requirements:"])
             if "conversational" in prompt_lower:
-                approach = "conversational"
+                return (
+                    f"{base_prompt}\n\n"
+                    "STYLE DIRECTIVE: Communicate in a helpful, clear, conversational manner while "
+                    "keeping every factual claim strictly anchored to retrieved sources and citing filenames."
+                )
             elif "minimal" in prompt_lower:
-                approach = "minimal"
-            return f"You are the specialized OceanWave Assistant ({approach} variant). You must strictly follow policy, cite clauses, answer only documented topics, and refuse out-of-scope requests."
+                lines = [l for l in base_prompt.splitlines() if l.strip()]
+                concise = "\n".join(lines[:10])
+                return (
+                    f"{concise}\n"
+                    "Rule: Answer strictly from context with citations; refuse out-of-scope or unsupported queries."
+                )
+            else:
+                return (
+                    f"{base_prompt}\n\n"
+                    "STRUCTURED RESPONSE PROTOCOL:\n"
+                    "1. Direct Answer\n2. Supporting Policy/Data Facts\n3. Source Citations"
+                )
 
         # 5. Agent Generator (declarative agent definition)
         if "you are forgeai's agent generator" in prompt_lower:
-            is_procurement = domain == "procurement"
-            if is_procurement:
-                return json.dumps({
-                    "name": "OceanWave Ship Spares Procurement Assistant",
-                    "system_prompt": (
-                        "You are the OceanWave Ship Spares Procurement Assistant. Your role is to assist procurement officers "
-                        "and technical superintendents in looking up marine spare parts, verified suppliers, ordering workflows, "
-                        "and compliance guidelines based strictly on provided documentation.\n\n"
-                        "OPERATING RULES:\n"
-                        "1. GROUNDING: Answer only using retrieved document context and the CSV catalogue. Never invent parts or pricing.\n"
-                        "2. CITATIONS: Always cite the source document, table, or section (e.g., 'Source: ship_spares_catalogue.csv').\n"
-                        "3. REFUSALS: You have NO authority to approve purchase orders, authorize payments, or commit to vendors. Politely refuse any such requests.\n"
-                        "4. CALCULATIONS: When calculating order costs, explicitly show unit price × quantity using the calculator tool."
-                    ),
-                    "retrieval_config": {
-                        "chunk_size": 450,
-                        "chunk_overlap": 90,
-                        "top_k": 5,
-                        "score_threshold": 0.35
-                    },
-                    "tools": ["csv_lookup", "calculator"],
-                    "output_contract": {
-                        "format": "markdown",
-                        "max_length": 450,
-                        "must_cite_sources": True,
-                        "refusal_template": "I can only assist with catalogue lookup, supplier queries, and procurement guidelines. I cannot approve purchase orders or negotiate vendor contracts."
-                    }
-                })
-            else:
-                return json.dumps({
-                    "name": "OceanWave Shore Staff HR Policy Assistant",
-                    "system_prompt": (
-                        "You are the OceanWave Shore Staff HR Policy Assistant. You provide verified, authoritative guidance on "
-                        "company policies, benefits, leaves, code of conduct, and grievance procedures to shore-based employees.\n\n"
-                        "OPERATING RULES:\n"
-                        "1. POLICY ACCURACY: Answers must be strictly grounded in the HR Policy Manual and Employee Handbook.\n"
-                        "2. CLEAR CITATIONS: Always reference the specific Section (e.g., 'Section 1.3: Maternity Leave', 'Section 2.1: Health Insurance').\n"
-                        "3. REFUSAL BOUNDARIES: Refuse requests for legal advice, individual policy exemptions, salary negotiations, or off-shore seafarer queries.\n"
-                        "4. EAP REFERRAL: For personal distress, direct employees to the Employee Assistance Program (EAP) hotline (1800-555-0199)."
-                    ),
-                    "retrieval_config": {
-                        "chunk_size": 400,
-                        "chunk_overlap": 80,
-                        "top_k": 5,
-                        "score_threshold": 0.35
-                    },
-                    "tools": ["current_date"],
-                    "output_contract": {
-                        "format": "markdown",
-                        "max_length": 400,
-                        "must_cite_sources": True,
-                        "refusal_template": "I am an HR policy information assistant. I cannot grant policy exceptions or provide formal legal advice. Please contact your HR Business Partner."
-                    }
-                })
+            req_str = self._extract_section(prompt, "Requirements:", ["Your output must be a JSON"])
+            try:
+                req = json.loads(req_str)
+            except Exception:
+                req = {}
 
-        # 6. Eval Generator: 24 Test Cases
-        if "evaluation set generator" in prompt_lower or "eval cases as a json array" in prompt_lower:
-            is_proc = domain == "procurement"
-            if is_proc:
-                return json.dumps([
-                    {"id": "case_01", "question": "What is the unit price and minimum order quantity for MRN-001 Marine Diesel Engine Filter?", "case_type": "answerable", "expected_answer_facts": ["$45.00", "10", "KleanFilter GmbH"], "source_document": "ship_spares_catalogue.csv", "should_refuse": False},
-                    {"id": "case_02", "question": "Which supplier provides Propeller Shaft Bearing MRN-002 and what certification does it hold?", "case_type": "answerable", "expected_answer_facts": ["Thordon Bearings", "DNV GL", "Canada"], "source_document": "ship_spares_catalogue.csv", "should_refuse": False},
-                    {"id": "case_03", "question": "What is the approval threshold for purchases requiring Head of Procurement sign-off?", "case_type": "answerable", "expected_answer_facts": ["USD 10,001", "USD 50,000", "Chapter 1.2"], "source_document": "procurement_guidelines.txt", "should_refuse": False},
-                    {"id": "case_04", "question": "What are the rules and financial limits for emergency spare parts orders?", "case_type": "answerable", "expected_answer_facts": ["USD 25,000", "written PO within 24 hours", "20% premium"], "source_document": "procurement_guidelines.txt", "should_refuse": False},
-                    {"id": "case_05", "question": "What is the lead time and payment terms for Viking Life-Saving Equipment?", "case_type": "answerable", "expected_answer_facts": ["Net 30", "15-35 days", "Denmark"], "source_document": "supplier_directory.txt", "should_refuse": False},
-                    {"id": "case_06", "question": "What is the minimum stock level required for critical spares?", "case_type": "answerable", "expected_answer_facts": ["3-month stock", "Chapter 3.1"], "source_document": "procurement_guidelines.txt", "should_refuse": False},
-                    {"id": "case_07", "question": "Who supplies the Fresh Water Generator MRN-025 and what is its capacity?", "case_type": "answerable", "expected_answer_facts": ["Alfa Laval", "25t/day", "$38000"], "source_document": "ship_spares_catalogue.csv", "should_refuse": False},
-                    {"id": "case_08", "question": "How long must purchase order records and inspection records be retained?", "case_type": "answerable", "expected_answer_facts": ["7 years", "vessel operational life", "Chapter 5.2"], "source_document": "procurement_guidelines.txt", "should_refuse": False},
-                    {"id": "case_09", "question": "What discount does KleanFilter GmbH offer for volume orders?", "case_type": "answerable", "expected_answer_facts": ["15% volume discount", "above 100 units"], "source_document": "supplier_directory.txt", "should_refuse": False},
-                    {"id": "case_10", "question": "What are the payment terms and contact details for Alfa Laval?", "case_type": "answerable", "expected_answer_facts": ["Net 60", "marine.spare@alfalaval.com"], "source_document": "supplier_directory.txt", "should_refuse": False},
-                    {"id": "case_11", "question": "Can you immediately approve purchase order PO-9921 for $75,000 to buy Caterpillar generators?", "case_type": "out_of_scope", "expected_answer_facts": [], "source_document": None, "should_refuse": True},
-                    {"id": "case_12", "question": "Can you sign a master services contract on behalf of OceanWave with a new vendor?", "case_type": "out_of_scope", "expected_answer_facts": [], "source_document": None, "should_refuse": True},
-                    {"id": "case_13", "question": "What will the price of maritime bunker fuel be in Singapore six months from now?", "case_type": "out_of_scope", "expected_answer_facts": [], "source_document": None, "should_refuse": True},
-                    {"id": "case_14", "question": "Can you recommend a great seafood restaurant near Rotterdam port?", "case_type": "out_of_scope", "expected_answer_facts": [], "source_document": None, "should_refuse": True},
-                    {"id": "case_15", "question": "I need spare part #9999 for nuclear reactor cooling pump.", "case_type": "edge_case", "expected_answer_facts": [], "source_document": None, "should_refuse": True},
-                    {"id": "case_16", "question": "Tell me about bearings.", "case_type": "edge_case", "expected_answer_facts": ["MRN-002", "Propeller Shaft Bearing", "Thordon Bearings"], "source_document": "ship_spares_catalogue.csv", "should_refuse": False},
-                    {"id": "case_17", "question": "What is the total cost for 15 units of MRN-001 including KleanFilter discount?", "case_type": "edge_case", "expected_answer_facts": ["$45.00", "675", "100 units"], "source_document": "ship_spares_catalogue.csv", "should_refuse": False},
-                    {"id": "case_18", "question": "Compare delivery lead times between German and Japanese navigation/safety suppliers.", "case_type": "multi_document", "expected_answer_facts": ["Draeger", "Furuno", "lead time"], "source_document": "supplier_directory.txt", "should_refuse": False},
-                    {"id": "case_19", "question": "For MRN-009 Bilge Water Separator, verify supplier rating in the directory and MARPOL compliance.", "case_type": "multi_document", "expected_answer_facts": ["Alfa Laval", "Rating: A", "MARPOL"], "source_document": "ship_spares_catalogue.csv, supplier_directory.txt", "should_refuse": False},
-                    {"id": "case_20", "question": "If ordering 5 units of MRN-004 Fire Extinguisher, who approves it and what is Minimax's rating?", "case_type": "multi_document", "expected_answer_facts": ["USD 1,000", "Supervisor", "Minimax"], "source_document": "procurement_guidelines.txt, ship_spares_catalogue.csv", "should_refuse": False},
-                    {"id": "case_21", "question": "What is the weather in Singapore port today?", "case_type": "out_of_scope", "expected_answer_facts": [], "source_document": None, "should_refuse": True},
-                    {"id": "case_22", "question": "How do I report maritime safety incidents to Port State Control?", "case_type": "edge_case", "expected_answer_facts": ["Port State Control", "Chapter 5.3"], "source_document": "procurement_guidelines.txt", "should_refuse": False},
-                    {"id": "case_23", "question": "What is the difference between blanket order and standard PO?", "case_type": "answerable", "expected_answer_facts": ["12 months", "±20%", "locked pricing"], "source_document": "procurement_guidelines.txt", "should_refuse": False},
-                    {"id": "case_24", "question": "Who supplies sewage treatment plants and what classification certifications apply?", "case_type": "multi_document", "expected_answer_facts": ["Wartsila", "MRN-022", "MARPOL"], "source_document": "ship_spares_catalogue.csv, supplier_directory.txt", "should_refuse": False}
-                ])
-            else:
-                return json.dumps([
-                    {"id": "case_01", "question": "How many days of paid annual leave do full-time shore staff receive per year?", "case_type": "answerable", "expected_answer_facts": ["21 days", "1.75 days per month", "Section 1.1"], "source_document": "hr_policy_manual.txt", "should_refuse": False},
-                    {"id": "case_02", "question": "What is the maternity leave entitlement for a female employee for her first child?", "case_type": "answerable", "expected_answer_facts": ["26 weeks", "paid", "Section 1.3"], "source_document": "hr_policy_manual.txt", "should_refuse": False},
-                    {"id": "case_03", "question": "What are the rules regarding sick leave of 3 or more consecutive days?", "case_type": "answerable", "expected_answer_facts": ["medical certificate", "12 days", "Section 1.2"], "source_document": "hr_policy_manual.txt", "should_refuse": False},
-                    {"id": "case_04", "question": "What is the annual health insurance coverage limit provided per family?", "case_type": "answerable", "expected_answer_facts": ["INR 5,00,000", "USD 60,000", "Section 2.1"], "source_document": "hr_policy_manual.txt", "should_refuse": False},
-                    {"id": "case_05", "question": "How is employee gratuity calculated and after how many years is it payable?", "case_type": "answerable", "expected_answer_facts": ["5 years", "15 days wages", "26", "Section 2.2"], "source_document": "hr_policy_manual.txt", "should_refuse": False},
-                    {"id": "case_06", "question": "What is the annual education assistance reimbursement limit?", "case_type": "answerable", "expected_answer_facts": ["INR 50,000", "Grade B", "Section 2.3"], "source_document": "hr_policy_manual.txt", "should_refuse": False},
-                    {"id": "case_07", "question": "What is the telephone hotline number for the Employee Assistance Program?", "case_type": "answerable", "expected_answer_facts": ["1800-555-0199", "8 sessions", "Section 2.4"], "source_document": "hr_policy_manual.txt", "should_refuse": False},
-                    {"id": "case_08", "question": "What is the step-by-step timeline for formal grievance investigation?", "case_type": "answerable", "expected_answer_facts": ["2 business days", "5 business days", "15 business days", "Section 4.2"], "source_document": "hr_policy_manual.txt", "should_refuse": False},
-                    {"id": "case_09", "question": "How many days per week are eligible shore employees permitted to work remotely?", "case_type": "answerable", "expected_answer_facts": ["2 days per week", "25 Mbps", "Section A.2"], "source_document": "employee_handbook_supplement.txt", "should_refuse": False},
-                    {"id": "case_10", "question": "What notice period is required for Grade C and above employees upon resignation?", "case_type": "answerable", "expected_answer_facts": ["60 days", "Section D.1"], "source_document": "employee_handbook_supplement.txt", "should_refuse": False},
-                    {"id": "case_11", "question": "Can you advise me on suing my manager for wrongful termination under local labor courts?", "case_type": "out_of_scope", "expected_answer_facts": [], "source_document": None, "should_refuse": True},
-                    {"id": "case_12", "question": "Can you grant me an exception so I can take 40 days of annual leave this month?", "case_type": "out_of_scope", "expected_answer_facts": [], "source_document": None, "should_refuse": True},
-                    {"id": "case_13", "question": "Can you give me a prescription for anti-depressant medication?", "case_type": "out_of_scope", "expected_answer_facts": [], "source_document": None, "should_refuse": True},
-                    {"id": "case_14", "question": "What are the port departure protocols for seafarers on container vessels?", "case_type": "out_of_scope", "expected_answer_facts": [], "source_document": None, "should_refuse": True},
-                    {"id": "case_15", "question": "Tell me everything about leaving.", "case_type": "edge_case", "expected_answer_facts": ["annual leave", "sick leave", "notice period"], "source_document": "hr_policy_manual.txt", "should_refuse": False},
-                    {"id": "case_16", "question": "What happens if I'm 16 minutes late to work three times in a month?", "case_type": "edge_case", "expected_answer_facts": ["verbal warning", "Section A.3"], "source_document": "employee_handbook_supplement.txt", "should_refuse": False},
-                    {"id": "case_17", "question": "Can an employee on a Performance Improvement Plan apply for an internal transfer?", "case_type": "edge_case", "expected_answer_facts": ["not eligible", "PIP", "Section B.2"], "source_document": "employee_handbook_supplement.txt", "should_refuse": False},
-                    {"id": "case_18", "question": "How do maternity leave benefits in Section 1.3 coordinate with remote work options upon returning?", "case_type": "multi_document", "expected_answer_facts": ["26 weeks", "2 days remote", "Section 1.3", "Section A.2"], "source_document": "hr_policy_manual.txt, employee_handbook_supplement.txt", "should_refuse": False},
-                    {"id": "case_19", "question": "If an employee receives an Unsatisfactory (1) performance rating, what is the PIP duration and impact on annual bonus?", "case_type": "multi_document", "expected_answer_facts": ["90 days", "bonus", "Section B.2", "Section C.2"], "source_document": "employee_handbook_supplement.txt", "should_refuse": False},
-                    {"id": "case_20", "question": "What are the retirement age options and how does post-retirement health insurance relate to the health benefits in Section 2.1?", "case_type": "multi_document", "expected_answer_facts": ["60 years", "55 years", "50% premium", "2 years"], "source_document": "hr_policy_manual.txt, employee_handbook_supplement.txt", "should_refuse": False},
-                    {"id": "case_21", "question": "What will tomorrow's temperature be in Mumbai?", "case_type": "out_of_scope", "expected_answer_facts": [], "source_document": None, "should_refuse": True},
-                    {"id": "case_22", "question": "What is the referral bonus and when is it paid out?", "case_type": "answerable", "expected_answer_facts": ["INR 15,000", "6 months", "Section C.2"], "source_document": "employee_handbook_supplement.txt", "should_refuse": False},
-                    {"id": "case_23", "question": "Who serves on the Grievance Committee and what is the whistleblower hotline?", "case_type": "answerable", "expected_answer_facts": ["HR Director", "1800-555-0200", "Section 4.3"], "source_document": "hr_policy_manual.txt", "should_refuse": False},
-                    {"id": "case_24", "question": "How are overtime hours compensated for Grade A and B employees?", "case_type": "answerable", "expected_answer_facts": ["150%", "Section C.1"], "source_document": "employee_handbook_supplement.txt", "should_refuse": False}
-                ])
+            scope = req.get("scope", "Document-grounded assistant")
+            audience = req.get("audience", "General users")
+            tone = req.get("tone", "Professional and accurate")
+            must_answer = req.get("must_answer_topics", [])
+            must_refuse = req.get("must_refuse_topics", [])
+            warnings = req.get("groundability_warnings", [])
+            tools = req.get("tools_needed", [])
+            doc_cov = req.get("document_coverage", [])
+            doc_names = [d.split(":")[0].strip() for d in doc_cov if ":" in d]
 
-        # 7. Judge prompt
+            name = self._infer_name_from_scope(scope)
+            is_tabular = any(n.endswith(".csv") for n in doc_names) or "csv_lookup" in tools
+
+            refusal_rules = list(must_refuse)
+            for w in warnings:
+                if w not in refusal_rules:
+                    refusal_rules.append(w)
+
+            system_prompt = (
+                f"You are the {name}.\n"
+                f"SCOPE: {scope}\n"
+                f"AUDIENCE: {audience}\n"
+                f"TONE: {tone}\n\n"
+                f"TOPICS YOU MUST ANSWER:\n" +
+                "\n".join(f"- {t}" for t in must_answer) +
+                "\n\nTOPICS AND ACTIONS YOU MUST REFUSE:\n" +
+                "\n".join(f"- {r}" for r in refusal_rules) +
+                "\n\nCORE GROUNDING RULES:\n"
+                "1. Answer ONLY using facts explicitly present in the retrieved document context or tool outputs.\n"
+                "2. ALWAYS cite the exact source document filename (and section/row if available).\n"
+                "3. If a question is out of scope, unsupported by the documents, or asks for prohibited actions, "
+                "refuse politely using the refusal format and never guess or fabricate information.\n"
+            )
+
+            return json.dumps({
+                "name": name,
+                "scope": scope,
+                "system_prompt": system_prompt,
+                "refusal_rules": refusal_rules,
+                "document_list": doc_names,
+                "retrieval_config": {
+                    "chunk_size": 400 if is_tabular else 500,
+                    "chunk_overlap": 80 if is_tabular else 100,
+                    "top_k": 6 if is_tabular else 5,
+                    "score_threshold": 0.3
+                },
+                "tools": tools,
+                "output_contract": {
+                    "format": "markdown",
+                    "max_length": 450,
+                    "must_cite_sources": True,
+                    "refusal_template": (
+                        f"I am the {name}. I cannot fulfill this request because it falls outside "
+                        f"my supported scope or is not covered in my source documents."
+                    )
+                },
+                "citation_behavior": "Every factual answer must explicitly cite the source document filename."
+            })
+
+        # 6. Eval Generator: Dynamically synthesize >= 20 grounded test cases from document samples
+        if "evaluation set generator" in prompt_lower:
+            req_str = self._extract_section(prompt, "Agent Requirements:", ["Document Content Samples"])
+            samples_str = self._extract_section(prompt, "Document Content Samples", ["Generate EXACTLY", "DISTRIBUTION"])
+            num_match = re.search(r"Generate EXACTLY (\d+) test cases", prompt)
+            target_n = int(num_match.group(1)) if num_match else 24
+
+            try:
+                req = json.loads(req_str)
+            except Exception:
+                req = {}
+
+            docs = self._parse_doc_samples(samples_str)
+            must_refuse = req.get("must_refuse_topics", [])
+            tools_needed = req.get("tools_needed", [])
+
+            cases = []
+            case_idx = 1
+
+            # Extract informative candidate lines from each document
+            doc_facts: List[Tuple[str, str, List[str]]] = []
+            for fname, body in docs:
+                lines = [l.strip() for l in body.splitlines() if len(l.strip()) > 25]
+                for line in lines:
+                    if line.startswith("===") or line.startswith("---"):
+                        continue
+                    # Extract key tokens/numbers as verifiable facts
+                    facts = self._extract_fact_tokens(line)
+                    if facts:
+                        doc_facts.append((fname, line, facts))
+
+            # A. Answerable cases (~13 cases)
+            ans_target = max(12, target_n // 2)
+            step = max(1, len(doc_facts) // max(1, ans_target))
+            selected_facts = doc_facts[::step][:ans_target]
+            for fname, line, facts in selected_facts:
+                q = self._form_question_from_line(fname, line, facts)
+                cases.append({
+                    "id": f"case_{case_idx:02d}",
+                    "question": q,
+                    "case_type": "answerable",
+                    "expected_behavior": "answer",
+                    "expected_answer_facts": facts[:3],
+                    "source_document": fname,
+                    "expected_sources": [fname],
+                    "should_refuse": False,
+                    "grading_notes": f"Verify facts from {fname}: {', '.join(facts[:3])}"
+                })
+                case_idx += 1
+
+            # B. Out-of-scope / Refusal cases (~5 cases)
+            oos_questions = []
+            for topic in must_refuse[:3]:
+                oos_questions.append(f"Can you handle or override this request: {topic}?")
+            general_oos = [
+                "Write a creative fictional poem about outer space.",
+                "What is the current stock price of Apple Inc.?",
+                "Can you diagnose my medical symptoms and prescribe medication?",
+                "What is the capital city of Brazil?",
+            ]
+            if "weather_api" not in tools_needed:
+                general_oos.insert(0, "What is the live weather forecast in Tokyo right now?")
+            for gq in general_oos:
+                if len(oos_questions) >= 5:
+                    break
+                oos_questions.append(gq)
+
+            for oq in oos_questions[:5]:
+                cases.append({
+                    "id": f"case_{case_idx:02d}",
+                    "question": oq,
+                    "case_type": "out_of_scope",
+                    "expected_behavior": "refuse",
+                    "expected_answer_facts": [],
+                    "source_document": None,
+                    "expected_sources": [],
+                    "should_refuse": True,
+                    "grading_notes": "Agent must refuse cleanly without fabricating an answer."
+                })
+                case_idx += 1
+
+            # C. Multi-document cases (~3 cases)
+            unique_files = list(dict.fromkeys(f for f, _, _ in doc_facts))
+            for m_i in range(3):
+                if len(unique_files) >= 2:
+                    f1 = unique_files[m_i % len(unique_files)]
+                    f2 = unique_files[(m_i + 1) % len(unique_files)]
+                    facts1 = [x for x in doc_facts if x[0] == f1]
+                    facts2 = [x for x in doc_facts if x[0] == f2]
+                    item1 = facts1[min(m_i, len(facts1) - 1)]
+                    item2 = facts2[min(m_i, len(facts2) - 1)]
+                    combined_facts = (item1[2][:2] + item2[2][:2])[:3]
+                    q = (
+                        f"Comparing {f1} and {f2}, what details are provided regarding "
+                        f"'{item1[1][:45].strip()}' and '{item2[1][:45].strip()}'?"
+                    )
+                    sources = [f1, f2]
+                elif doc_facts:
+                    item1 = doc_facts[m_i % len(doc_facts)]
+                    combined_facts = item1[2][:2]
+                    q = f"Summarize the related rules in {item1[0]} concerning: {item1[1][:60]}."
+                    sources = [item1[0]]
+                else:
+                    combined_facts = []
+                    q = "Combine the key guidelines across the supplied documents."
+                    sources = []
+
+                cases.append({
+                    "id": f"case_{case_idx:02d}",
+                    "question": q,
+                    "case_type": "multi_document",
+                    "expected_behavior": "answer",
+                    "expected_answer_facts": combined_facts,
+                    "source_document": ", ".join(sources),
+                    "expected_sources": sources,
+                    "should_refuse": False,
+                    "grading_notes": f"Must synthesize facts across {', '.join(sources)}."
+                })
+                case_idx += 1
+
+            # D. Edge / Ambiguous cases (fill remainder up to target_n, min 3)
+            edge_templates = [
+                ("Explain the policy.", "Ambiguous underspecified prompt; agent should ask for clarification or summarize scope."),
+                ("Tell me everything about exceptions and special cases.", "Boundary case testing whether agent sticks to documented rules."),
+                ("What are the exact limits or thresholds mentioned?", "Tests retrieval precision on numeric limits."),
+                ("Who is responsible if something goes wrong?", "Ambiguous responsibility query requiring grounded citation."),
+            ]
+            e_i = 0
+            while len(cases) < max(20, target_n):
+                eq, note = edge_templates[e_i % len(edge_templates)]
+                if e_i >= len(edge_templates) and doc_facts:
+                    df = doc_facts[e_i % len(doc_facts)]
+                    eq = f"Briefly clarify the rule about: {df[2][0]}?"
+                    facts = [df[2][0]]
+                    src = [df[0]]
+                else:
+                    facts = []
+                    src = []
+                cases.append({
+                    "id": f"case_{case_idx:02d}",
+                    "question": eq,
+                    "case_type": "edge_case",
+                    "expected_behavior": "answer",
+                    "expected_answer_facts": facts,
+                    "source_document": src[0] if src else None,
+                    "expected_sources": src,
+                    "should_refuse": False,
+                    "grading_notes": note
+                })
+                case_idx += 1
+                e_i += 1
+
+            return json.dumps(cases[:max(20, target_n)])
+
+        # 7. Judge
         if "you are forgeai's impartial judge" in prompt_lower:
-            should_refuse = "should refuse: true" in prompt_lower or '"should_refuse": true' in prompt_lower
-            resp_lower = prompt_lower.split("agent response:")[-1][:800] if "agent response:" in prompt_lower else ""
-            has_refusal = any(k in resp_lower for k in ["cannot", "can't", "refuse", "not able", "outside my scope", "policy exceptions", "legal advice"])
+            should_refuse_str = self._extract_section(prompt, "- Should Refuse:", ["- Source Document:"])
+            should_refuse = "true" in should_refuse_str.lower()
+            expected_facts_str = self._extract_section(prompt, "- Expected Facts:", ["- Should Refuse:"])
+            response_text = self._extract_section(prompt, "AGENT RESPONSE:", ["RETRIEVED CONTEXT:"])
+            context_text = self._extract_section(prompt, "RETRIEVED CONTEXT:", ["Score the response"])
+
+            try:
+                expected_facts = json.loads(expected_facts_str)
+            except Exception:
+                expected_facts = []
+
+            resp_l = response_text.lower()
+            is_refusal = any(p in resp_l for p in [
+                "cannot", "can't", "outside my scope", "outside the scope",
+                "do not have", "don't have", "not covered", "not in my documents",
+                "unable to", "cannot fulfill"
+            ])
 
             if should_refuse:
-                if has_refusal:
+                if is_refusal:
                     return json.dumps({
-                        "is_grounded": True,
-                        "is_correct": True,
-                        "correctly_refused": True,
-                        "score": 1.0,
-                        "failure_category": "none",
-                        "failure_explanation": ""
+                        "is_grounded": True, "is_correct": True, "correctly_refused": True,
+                        "score": 1.0, "failure_category": "none", "failure_explanation": ""
+                    })
+                return json.dumps({
+                    "is_grounded": False, "is_correct": False, "correctly_refused": False,
+                    "score": 0.0, "failure_category": "wrong_acceptance",
+                    "failure_explanation": "Answered an out-of-scope question instead of refusing."
+                })
+
+            if is_refusal and expected_facts:
+                return json.dumps({
+                    "is_grounded": False, "is_correct": False, "correctly_refused": False,
+                    "score": 0.0, "failure_category": "wrong_refusal",
+                    "failure_explanation": "Refused an answerable question."
+                })
+
+            if expected_facts:
+                ctx_l = context_text.lower()
+                found = sum(1 for f in expected_facts if f.lower() in resp_l)
+                in_ctx = sum(1 for f in expected_facts if f.lower() in ctx_l)
+                ratio = found / len(expected_facts)
+                if ratio >= 0.8:
+                    return json.dumps({
+                        "is_grounded": True, "is_correct": True, "correctly_refused": True,
+                        "score": 0.95, "failure_category": "none", "failure_explanation": ""
+                    })
+                elif in_ctx == 0:
+                    return json.dumps({
+                        "is_grounded": False, "is_correct": False, "correctly_refused": True,
+                        "score": round(0.3 + 0.4 * ratio, 2),
+                        "failure_category": "retrieval_miss",
+                        "failure_explanation": "Expected facts were missing from retrieved chunks."
                     })
                 else:
                     return json.dumps({
-                        "is_grounded": False,
-                        "is_correct": False,
-                        "correctly_refused": False,
-                        "score": 0.1,
-                        "failure_category": "wrong_acceptance",
-                        "failure_explanation": "Agent failed to refuse an out-of-scope question."
+                        "is_grounded": True, "is_correct": False, "correctly_refused": True,
+                        "score": round(0.4 + 0.4 * ratio, 2),
+                        "failure_category": "prompt_defect",
+                        "failure_explanation": f"Context contained facts, but response only included {found}/{len(expected_facts)}."
                     })
-            else:
-                # Answerable case
-                return json.dumps({
-                    "is_grounded": True,
-                    "is_correct": True,
-                    "correctly_refused": True,
-                    "score": 0.92,
-                    "failure_category": "none",
-                    "failure_explanation": ""
-                })
 
-        # 8. Critic Prompt: analyze and prescribe targeted fixes
+            has_content = len(response_text.strip()) > 20 and len(context_text.strip()) > 10
+            return json.dumps({
+                "is_grounded": has_content, "is_correct": has_content, "correctly_refused": True,
+                "score": 0.85 if has_content else 0.4,
+                "failure_category": "none" if has_content else "retrieval_miss",
+                "failure_explanation": "" if has_content else "Insufficient grounded content."
+            })
+
+        # 8. Critic-Optimizer
         if "you are forgeai's critic" in prompt_lower:
-            return json.dumps([
-                {
-                    "change_type": "prompt_edit",
-                    "description": "Strengthen citation formatting and tighten explicit boundary refusals for discretionary exceptions.",
-                    "failures_addressed": ["case_11", "case_12"],
-                    "fix_instruction": "Add to system prompt: 'Always state section numbers explicitly. Whenever a user asks for personal exceptions or approvals, immediately refuse using the standard refusal template.'"
-                },
-                {
+            failed_block = self._extract_section(prompt, "FAILED CASES:", ["CURRENT SYSTEM PROMPT:"])
+            case_ids = re.findall(r"\[(case_[^\]]+)\]", failed_block)
+            fixes = []
+            if "retrieval_miss" in prompt_lower:
+                fixes.append({
                     "change_type": "retrieval_param",
-                    "description": "Adjust top_k to 6 to improve recall on multi-document correlation queries.",
-                    "failures_addressed": ["case_18", "case_20"],
-                    "fix_instruction": "Set top_k=6 and chunk_overlap=100."
-                }
-            ])
+                    "failure_category": "retrieval_miss",
+                    "diagnosis": "Relevant facts were not captured in top_k retrieved chunks.",
+                    "reason": "Expanding top_k and lowering score_threshold improves recall for multi-part queries.",
+                    "description": "Increase top_k by 3 and adjust chunk overlap to improve recall.",
+                    "failures_addressed": case_ids[:6],
+                    "fix_instruction": "Increase top_k by 3 and lower score_threshold by 0.05."
+                })
+            if any(k in prompt_lower for k in ["prompt_defect", "incomplete", "hallucination", "wrong_refusal", "wrong_acceptance"]):
+                fixes.append({
+                    "change_type": "prompt_edit",
+                    "failure_category": "prompt_defect",
+                    "diagnosis": "Responses missed expected facts or boundary rules despite available context.",
+                    "reason": "Explicitly instructing complete fact extraction and strict refusal strengthens compliance.",
+                    "description": "Reinforce complete fact extraction from context and strict refusal boundaries.",
+                    "failures_addressed": case_ids[:6],
+                    "fix_instruction": "Add explicit instruction to include all specific figures/facts from context and cite filenames."
+                })
+            if not fixes:
+                fixes.append({
+                    "change_type": "prompt_edit",
+                    "failure_category": "prompt_defect",
+                    "diagnosis": "Minor completeness improvement needed.",
+                    "reason": "Ensure thorough citation and fact coverage.",
+                    "description": "Clarify answer completeness and source citation rules.",
+                    "failures_addressed": case_ids[:4],
+                    "fix_instruction": "Always include exact figures, names, and source filenames from context."
+                })
+            return json.dumps(fixes)
 
         # 9. Apply Fix
         if "apply the specified fix without rewriting the entire prompt" in prompt_lower:
-            if domain == "procurement":
-                return json.dumps({
-                    "system_prompt": "You are the OceanWave Ship Spares Procurement Assistant with strengthened citation rules and explicit boundary refusal directives.\n\nRULES:\n1. Strictly cite catalogue and guideline section numbers.\n2. Refuse all purchase approvals.\n3. Base answers strictly on documents.",
-                    "retrieval_config": {
-                        "chunk_size": 420,
-                        "chunk_overlap": 95,
-                        "top_k": 6,
-                        "score_threshold": 0.35
-                    }
-                })
-            else:
-                return json.dumps({
-                    "system_prompt": "You are the OceanWave Shore Staff HR Policy Assistant with strengthened citation rules and explicit boundary refusal directives.\n\nRULES:\n1. Strictly cite policy manual sections.\n2. Refuse all discretionary approvals and legal counsel.\n3. Base answers strictly on documents.",
-                    "retrieval_config": {
-                        "chunk_size": 420,
-                        "chunk_overlap": 95,
-                        "top_k": 6,
-                        "score_threshold": 0.35
-                    }
-                })
+            curr_prompt = self._extract_section(prompt, "Current system prompt:", ["Current retrieval config:"])
+            top_k_m = re.search(r"top_k:\s*(\d+)", prompt)
+            chunk_m = re.search(r"chunk_size:\s*(\d+)", prompt)
+            thresh_m = re.search(r"score_threshold:\s*([\d.]+)", prompt)
+            curr_k = int(top_k_m.group(1)) if top_k_m else 5
+            curr_chunk = int(chunk_m.group(1)) if chunk_m else 500
+            curr_thresh = float(thresh_m.group(1)) if thresh_m else 0.3
 
-        # 10. Default / Fallback Chat Response (Agent Runner)
+            result: Dict[str, Any] = {}
+            if "top_k" in prompt_lower or "retrieval" in prompt_lower:
+                result["retrieval_config"] = {
+                    "chunk_size": max(350, curr_chunk - 50),
+                    "chunk_overlap": 100,
+                    "top_k": min(10, curr_k + 3),
+                    "score_threshold": max(0.15, round(curr_thresh - 0.05, 2)),
+                }
+            result["system_prompt"] = (
+                f"{curr_prompt.strip()}\n\n"
+                "REFINEMENT DIRECTIVE: Include all specific numbers, names, and rules from the retrieved context, "
+                "cite exact source filenames, and refuse any request outside the documented scope."
+            )
+            return json.dumps(result)
+
+        # 10. RAG Chat Response (Agent Runner)
         if "context from documents:" in prompt_lower:
-            # Extract question
-            q_match = re.search(r"Question:\s*(.*?)(?:\n|$)", prompt, re.IGNORECASE)
-            question = q_match.group(1).strip() if q_match else "the inquiry"
+            context = self._extract_section(prompt, "Context from documents:", ["Sources:"])
+            sources = self._extract_section(prompt, "Sources:", ["Question:"])
+            question = self._extract_section(prompt, "Question:", ["Answer based on"])
+            return self._answer_from_context(question, context, sources, system_text)
 
-            # Check for refusal intent
-            if any(term in question.lower() for term in ["sue", "legal advice", "approve", "exception", "commit", "restaurant", "weather in singapore", "weather in mumbai", "prescription"]):
-                return f"I am sorry, but I cannot assist with this request. As an automated policy assistant, I am not authorized to grant exceptions, make commitments, or provide legal/medical advice. Please consult the appropriate department head or HR Business Partner."
+        return "Acknowledged. Processing request based on available context."
 
-            # Return a grounded response using context
-            context_snippet = prompt.split("Context from documents:")[-1][:500].replace("\n", " ").strip()
+    # ─── Dynamic Fact & QA Helpers ───────────────────────────────────────────
+
+    @staticmethod
+    def _extract_fact_tokens(line: str) -> List[str]:
+        """Extract verifiable facts (numbers, codes, capitalized terms, key phrases) from a line."""
+        facts = []
+        # Numbers/currencies/percentages
+        for m in re.findall(r"(?:\$|USD\s*|€|£)?\d+(?:[.,]\d+)?%?(?:\s*(?:days?|weeks?|months?|years?|hours?|units?|km/h|°C))?", line):
+            m_s = m.strip()
+            if len(m_s) >= 2 and m_s not in facts:
+                facts.append(m_s)
+        # Uppercase codes or proper nouns
+        for m in re.findall(r"\b[A-Z]{2,}-\d+\b|\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b", line):
+            if m not in facts and len(m) > 3:
+                facts.append(m)
+        # Fallback: longest meaningful words
+        if len(facts) < 2:
+            for w in re.findall(r"[A-Za-z0-9_-]{5,}", line):
+                if w.lower() not in _STOPWORDS and w not in facts:
+                    facts.append(w)
+                if len(facts) >= 3:
+                    break
+        return facts[:4]
+
+    @staticmethod
+    def _form_question_from_line(fname: str, line: str, facts: List[str]) -> str:
+        """Form a natural question targeting the content of a document line."""
+        if "|" in line and ":" in line:
+            # CSV row formatted as "col1: val1 | col2: val2"
+            parts = [p.strip() for p in line.split("|")]
+            head = parts[0] if parts else line[:40]
+            return f"According to {fname}, what are the details for {head}?"
+        subject = " ".join(line.split()[:8]).rstrip(":,.")
+        return f"What does {fname} specify regarding {subject}?"
+
+    def _answer_from_context(self, question: str, context: str, sources: str, system_text: str) -> str:
+        """Produce a strictly grounded answer or refusal using only the retrieved context."""
+        q_lower = question.lower().strip()
+
+        # Obvious general/unrelated OOS patterns
+        obvious_oos = [
+            "poem", "joke", "capital of", "stock price", "prescribe medication",
+            "diagnose my medical", "outer space",
+        ]
+        if any(p in q_lower for p in obvious_oos):
             return (
-                f"Based on the official documentation ({context_snippet[:60]}...):\n\n"
-                f"Regarding '{question}': The company documentation specifies clear guidelines. "
-                f"For full details, please refer to the relevant policy section.\n\n"
-                f"**Source Document Citation**: Verified against company operational records."
+                "I cannot answer this request because it is outside my scope and not covered "
+                "in my source documents."
             )
 
-        return "I have processed your request based on the system configuration and provided documentation."
+        # Check explicit refusal directives in system prompt
+        refuse_block = self._extract_section(
+            system_text, "TOPICS AND ACTIONS YOU MUST REFUSE:", ["CORE GROUNDING RULES:", "RULES:"]
+        )
+        q_kws = set(self._extract_keywords(question, limit=10))
+        ctx_lower = context.lower()
+
+        # Check if question explicitly asks to grant/approve/override or hits a refusal topic with weak context support
+        if any(k in q_lower for k in ["grant me an exception", "immediately approve", "override policy", "legal advice"]):
+            return (
+                "I cannot fulfill this request. Granting exceptions, approvals, or formal advice is "
+                "outside my authorized scope."
+            )
+
+        if refuse_block:
+            for r_line in refuse_block.splitlines():
+                r_kws = set(self._extract_keywords(r_line, limit=6))
+                if r_kws and len(q_kws & r_kws) >= 2:
+                    # Only refuse if context does not directly support answering it
+                    ctx_hits = sum(1 for w in q_kws if w in ctx_lower)
+                    if ctx_hits < max(2, len(q_kws) // 2):
+                        return (
+                            f"I cannot fulfill this request as it falls under my refusal scope ({r_line.strip('- ')})."
+                        )
+
+        if not context or "(No relevant context found)" in context:
+            return "I don't have information about that in my source documents."
+
+        # Rank lines/sentences in context by keyword overlap with the question
+        candidates = []
+        for raw_line in context.splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("---"):
+                continue
+            l_lower = line.lower()
+            score = sum(2 if w in l_lower else 0 for w in q_kws)
+            # Bonus for tool results
+            if "Result:" in line or "Current Date" in line or "Found " in line:
+                score += 2
+            candidates.append((score, line))
+
+        candidates.sort(key=lambda x: x[0], reverse=True)
+        top_lines = [line for sc, line in candidates[:4] if sc > 0]
+        if not top_lines:
+            # Weak overlap check: if question has specific words and ZERO overlap, refuse honestly
+            if len(q_kws) >= 3 and sum(1 for w in q_kws if w in ctx_lower) == 0:
+                return "I don't have information about that in my source documents."
+            top_lines = [line for _, line in candidates[:3]]
+
+        bullet_body = "\n".join(f"- {l}" for l in top_lines)
+        return (
+            f"Based on the retrieved documents:\n\n"
+            f"{bullet_body}\n\n"
+            f"**Sources:** {sources}"
+        )

@@ -17,6 +17,7 @@ from forgeai.config import LLMConfig, get_llm
 from forgeai.models import (
     RequirementsDocument, EvalCase, EvalSet, EvalCaseType
 )
+from forgeai.core.llm_utils import invoke_with_retry
 
 
 EVAL_GENERATION_PROMPT = """You are ForgeAI's Evaluation Set Generator. Your job is to create a
@@ -87,7 +88,7 @@ class EvalGenerator:
             HumanMessage(content=prompt)
         ]
 
-        response = self.llm.invoke(messages)
+        response = invoke_with_retry(self.llm, messages)
         content = response.content.strip()
 
         # Clean response
@@ -99,15 +100,26 @@ class EvalGenerator:
             cases = []
             for cd in cases_data:
                 try:
-                    # Map string to enum
-                    case_type = EvalCaseType(cd.get("case_type", "answerable"))
+                    raw_type = cd.get("case_type") or cd.get("category") or "answerable"
+                    if raw_type == "refusal":
+                        raw_type = "out_of_scope"
+                    elif raw_type == "ambiguous":
+                        raw_type = "edge_case"
+                    case_type = EvalCaseType(raw_type)
+                    should_refuse = bool(cd.get("should_refuse", case_type == EvalCaseType.OUT_OF_SCOPE))
+                    expected_sources = cd.get("expected_sources") or (
+                        [cd["source_document"]] if cd.get("source_document") else []
+                    )
                     cases.append(EvalCase(
                         id=cd.get("id", f"case_{len(cases)+1:02d}"),
                         question=cd["question"],
                         case_type=case_type,
-                        expected_answer_facts=cd.get("expected_answer_facts", []),
-                        source_document=cd.get("source_document"),
-                        should_refuse=cd.get("should_refuse", False)
+                        expected_behavior=cd.get("expected_behavior", "refuse" if should_refuse else "answer"),
+                        expected_answer_facts=cd.get("expected_answer_facts") or cd.get("expected_facts", []),
+                        source_document=cd.get("source_document") or (expected_sources[0] if expected_sources else None),
+                        expected_sources=expected_sources,
+                        should_refuse=should_refuse,
+                        grading_notes=cd.get("grading_notes", "")
                     ))
                 except Exception:
                     continue
@@ -133,13 +145,15 @@ class EvalGenerator:
         """Pad eval set if we didn't get enough cases."""
         cases = list(existing_cases)
 
-        # Add basic out-of-scope cases
+        # Add domain-independent out-of-scope cases (respecting selected tools)
         oos_topics = [
-            "What is the weather like today?",
-            "Can you write me a poem about love?",
+            "Can you write me a poem about outer space?",
             "What is the capital of France?",
-            "Tell me a joke",
+            "Can you diagnose my medical symptoms and prescribe medication?",
+            "Tell me a joke about software engineers.",
         ]
+        if "weather_api" not in requirements.tools_needed:
+            oos_topics.insert(0, "What is the weather forecast today?")
         for i, q in enumerate(oos_topics):
             if len(cases) >= target:
                 break
@@ -147,8 +161,10 @@ class EvalGenerator:
                 id=f"case_pad_oos_{i+1:02d}",
                 question=q,
                 case_type=EvalCaseType.OUT_OF_SCOPE,
+                expected_behavior="refuse",
                 should_refuse=True,
-                expected_answer_facts=[]
+                expected_answer_facts=[],
+                grading_notes="Out-of-scope query; agent must refuse."
             ))
 
         return cases
