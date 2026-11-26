@@ -216,12 +216,12 @@ Expected output:
 
 ```bash
 python -m forgeai.run_factory \
-  --brief path/to/brief.txt \
-  --documents path/to/documents \
-  --output path/to/output
+  --brief forgeai/data/sample_brief.txt \
+  --documents forgeai/data/sample_docs \
+  --output output/sample_run
 ```
 
-(Also supports `--interactive`, `--human-checkpoint`, `--max-iterations`, and `--no-tournament`.)
+*(Replace `--brief` and `--documents` with any custom `.txt` brief and folder of `.pdf`/`.csv`/`.txt`/`.md` files. Also supports `--interactive`, `--human-checkpoint`, `--max-iterations`, and `--no-tournament`.)*
 
 ### Build a Custom Agent
 

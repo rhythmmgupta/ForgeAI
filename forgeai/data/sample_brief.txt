@@ -1,0 +1,1 @@
+I need a Workplace Operations assistant for remote staff. It should answer questions about remote work days, home office stipends, and travel meal expense limits. It must refuse to approve expense claims or give tax advice.

@@ -69,6 +69,15 @@ def main():
     docs_path = Path(args.documents)
     if not docs_path.exists() or not docs_path.is_dir():
         print(f"Error: Document folder not found: {args.documents}", file=sys.stderr)
+        print(
+            "Tip: Replace 'path/to/brief.txt' and 'path/to/documents' with real paths, "
+            "or try the included sample:\n"
+            "  python -m forgeai.run_factory "
+            "--brief forgeai/data/sample_brief.txt "
+            "--documents forgeai/data/sample_docs "
+            "--output output/sample_run",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     config = ForgeAIConfig(
