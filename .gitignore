@@ -16,6 +16,7 @@ Thumbs.db
 # Data
 *.faiss
 chroma_db/
+output/
 
 # Temp
 *.tmp
