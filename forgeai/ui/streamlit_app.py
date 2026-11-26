@@ -299,7 +299,7 @@ def home_page():
         **ForgeAI autonomously:**
         - 🗣️ **Interviews & Guards**: Clarifies ambiguities and flags unsupported requests before hallucination starts.
         - 🤖 **Drafts Declarative Agents**: Synthesizes system prompts, RAG chunking parameters, and tool attachments.
-        - 📝 **Auto-Generates Test Sets**: Synthesizes $\ge 20$ grounded test cases across answerable, refusal, and edge cases.
+        - 📝 **Auto-Generates Test Sets**: Synthesizes 20+ grounded test cases across answerable, refusal, and edge cases.
         - ⚖️ **Judges with Bias Defenses**: Blends deterministic verification with LLM-as-judge, defending against verbosity and position bias.
         - 🔄 **Critic-Optimizer Loop**: Diagnoses failures into standard categories and applies targeted fixes (max 3 iterations).
         - 📊 **Honest Reporting**: Explains remaining failure points rather than fabricating suspicious 100% scores.
