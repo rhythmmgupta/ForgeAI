@@ -37,7 +37,10 @@ def invoke_with_retry(
             last_exc = exc
             err_str = str(exc).lower()
             is_quota_or_unavailable = any(
-                tok in err_str for tok in ["429", "resource_exhausted", "503", "unavailable", "rate_limit"]
+                tok in err_str for tok in [
+                    "429", "resource_exhausted", "503", "unavailable", "rate_limit",
+                    "404", "model_not_found", "not_found"
+                ]
             )
             if is_quota_or_unavailable:
                 logger.warning(

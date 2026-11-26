@@ -391,7 +391,7 @@ def sidebar():
         elif "Groq" in provider_display:
             provider = "groq"
             api_key = st.text_input("Groq API Key", type="password", value=os.getenv("GROQ_API_KEY", ""))
-            model = st.selectbox("Model", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"])
+            model = st.selectbox("Model", ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"])
         else:
             provider = "gemini"
             api_key = st.text_input("Google AI Key", type="password", value=os.getenv("GOOGLE_API_KEY", ""))

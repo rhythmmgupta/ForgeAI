@@ -83,7 +83,7 @@ def main():
     config = ForgeAIConfig(
         llm=LLMConfig(
             provider=os.getenv("LLM_PROVIDER", "groq"),
-            model=os.getenv("LLM_MODEL", "llama-3.3-70b-versatile"),
+            model=os.getenv("LLM_MODEL", "openai/gpt-oss-120b"),
         ),
         budget=BudgetConfig(max_iterations=max(1, min(3, args.max_iterations))),
         verbose=True,

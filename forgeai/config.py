@@ -16,7 +16,7 @@ load_dotenv()
 class LLMConfig:
     """Configuration for the LLM provider."""
     provider: str = os.getenv("LLM_PROVIDER", "groq")
-    model: str = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
+    model: str = os.getenv("LLM_MODEL", "openai/gpt-oss-120b")
     temperature: float = 0.3
     max_tokens: int = 4096
     groq_api_key: Optional[str] = field(default_factory=lambda: os.getenv("GROQ_API_KEY"))
