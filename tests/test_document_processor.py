@@ -36,3 +36,18 @@ def test_document_summary(tmp_path):
     docs = load_documents(str(tmp_path))
     summary = get_document_summary(docs)
     assert "guide.txt" in summary
+
+
+def test_local_deterministic_embeddings_faiss_search(tmp_path):
+    from langchain_community.vectorstores import FAISS
+    from forgeai.config import LocalDeterministicEmbeddings
+
+    doc_file = tmp_path / "leave.txt"
+    doc_file.write_text("Shore staff receive 21 days of paid annual leave per year.")
+    docs = load_documents(str(tmp_path))
+    chunks = chunk_documents(docs, chunk_size=200, chunk_overlap=20)
+    emb = LocalDeterministicEmbeddings(dim=384)
+    vs = FAISS.from_documents(chunks, emb)
+    results = vs.similarity_search_with_score("annual leave days", k=2)
+    assert len(results) >= 1
+    assert "21 days" in results[0][0].page_content

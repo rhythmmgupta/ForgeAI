@@ -107,7 +107,13 @@ def get_llm(config: LLMConfig):
         return OfflineSimulationChatModel()
 
 
-class LocalDeterministicEmbeddings:
+try:
+    from langchain_core.embeddings import Embeddings as _BaseEmbeddings
+except ImportError:
+    _BaseEmbeddings = object
+
+
+class LocalDeterministicEmbeddings(_BaseEmbeddings):
     """
     Lightweight, robust embeddings based on character/word hashing and n-grams.
     Zero-network dependency, completely offline-compatible, and produces fixed-length
@@ -115,6 +121,9 @@ class LocalDeterministicEmbeddings:
     """
     def __init__(self, dim: int = 384):
         self.dim = dim
+
+    def __call__(self, text: str) -> List[float]:
+        return self.embed_query(text)
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         return [self.embed_query(t) for t in texts]
@@ -139,6 +148,7 @@ class LocalDeterministicEmbeddings:
 
 def get_embeddings(config: EmbeddingConfig):
     """Factory function to create the embedding model with offline fallback."""
+    os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
     os.environ.setdefault("HF_HUB_OFFLINE", "1")
     os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
     try:
