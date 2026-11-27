@@ -96,14 +96,17 @@ class AgentRunner:
             Tuple of (answer, retrieved_chunks)
         """
         # 0. Auto-watch: rebuild vector store automatically if documents changed on disk
-        current_fp = self._compute_folder_fingerprint(self.doc_folder)
-        if current_fp and current_fp != self._doc_fingerprint:
-            self._build_vector_store(self.doc_folder, self.embedding_config)
+        if self.doc_folder:
+            current_fp = self._compute_folder_fingerprint(self.doc_folder)
+            if current_fp and current_fp != self._doc_fingerprint:
+                self._build_vector_store(self.doc_folder, self.embedding_config)
 
         # 1. Retrieve relevant chunks
+        top_k = int(self.definition.retrieval_config.top_k or 5)
+        score_thresh = float(self.definition.retrieval_config.score_threshold or 0.3)
         retrieved_docs = self.vector_store.similarity_search_with_score(
-            question,
-            k=self.definition.retrieval_config.top_k
+            str(question),
+            k=top_k
         )
 
         # Filter by score threshold
@@ -111,7 +114,7 @@ class AgentRunner:
         source_info = []
         for doc, score in retrieved_docs:
             # FAISS uses L2 distance, lower is better
-            if score <= (2.0 - self.definition.retrieval_config.score_threshold * 2):
+            if float(score) <= (2.0 - score_thresh * 2):
                 relevant_chunks.append(doc.page_content)
                 source = doc.metadata.get("source", "Unknown")
                 page = doc.metadata.get("page", "")

@@ -718,7 +718,7 @@ def chat_page():
     st.markdown("**💡 Quick Test Prompts:**")
     cp1, cp2, cp3, cp4 = st.columns(4)
     quick_prompt = None
-    if "HR" in definition.name:
+    if "hr" in definition.name.lower() or "policy" in definition.name.lower():
         if cp1.button("🌴 Annual Leave Entitlement"):
             quick_prompt = "How many days of paid annual leave do shore staff receive per year?"
         if cp2.button("👶 Maternity Leave Period"):
@@ -753,8 +753,12 @@ def chat_page():
     if user_query:
         st.session_state[msg_key].append({"role": "user", "content": user_query})
         with st.spinner("Retrieving knowledge & generating grounded response..."):
-            runner = st.session_state[runner_key]
-            ans, chunks = runner.query(user_query, return_context=True)
+            try:
+                runner = st.session_state[runner_key]
+                ans, chunks = runner.query(str(user_query), return_context=True)
+            except Exception as e:
+                ans = f"I encountered an error while answering: {e}"
+                chunks = []
         st.session_state[msg_key].append({"role": "assistant", "content": ans, "sources": chunks})
         st.rerun()
 
