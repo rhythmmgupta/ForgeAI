@@ -688,17 +688,18 @@ def chat_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # Initialize Runner
-    runner_key = f"runner_{definition.name}"
+    # Initialize Runner (keyed by agent + provider + model so sidebar changes take effect)
+    prov = st.session_state.get("llm_provider", "simulator")
+    key = st.session_state.get("api_key", "")
+    model_name = st.session_state.get("llm_model", "forgeai-offline-simulator")
+    runner_key = f"runner_{definition.name}_{prov}_{model_name}"
     if runner_key not in st.session_state:
         from forgeai.config import ForgeAIConfig, LLMConfig, EmbeddingConfig
         from forgeai.runners.agent_runner import AgentRunner
         
-        prov = st.session_state.get("llm_provider", "simulator")
-        key = st.session_state.get("api_key", "")
         cfg = LLMConfig(
             provider=prov,
-            model=st.session_state.get("llm_model", "forgeai-offline-simulator"),
+            model=model_name,
             groq_api_key=key if prov == "groq" else None,
             google_api_key=key if prov == "gemini" else None,
         )
